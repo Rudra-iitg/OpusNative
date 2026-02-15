@@ -1,8 +1,47 @@
 import Foundation
 
+// MARK: - Ollama API Response Models
+
+/// Response from GET /api/tags — lists locally installed Ollama models.
+struct OllamaTagResponse: Codable, Sendable {
+    let models: [OllamaModelInfo]
+}
+
+/// Metadata for a single locally installed Ollama model.
+struct OllamaModelInfo: Codable, Sendable, Identifiable {
+    var id: String { name }
+    let name: String
+    let model: String?
+    let size: Int?
+
+    /// Human-readable size string (e.g., "3.1 GB")
+    var formattedSize: String {
+        guard let size else { return "" }
+        let gb = Double(size) / 1_000_000_000
+        if gb >= 1.0 {
+            return String(format: "%.1f GB", gb)
+        }
+        let mb = Double(size) / 1_000_000
+        return String(format: "%.0f MB", mb)
+    }
+
+    /// Whether this model is large (>10 GB)
+    var isLargeModel: Bool {
+        guard let size else { return false }
+        return size > 10_000_000_000
+    }
+
+    /// Whether this is an embedding-only model (should be filtered from chat)
+    var isEmbeddingModel: Bool {
+        name.lowercased().contains("embedding") ||
+        name.lowercased().contains("embed")
+    }
+}
+
 // MARK: - Ollama Provider
 
 /// Local Ollama provider via localhost API.
+/// Dynamically fetches installed models from /api/tags.
 /// Full streaming support via NDJSON, configurable base URL.
 final class OllamaProvider: AIProvider, @unchecked Sendable {
     let id = "ollama"
@@ -11,26 +50,93 @@ final class OllamaProvider: AIProvider, @unchecked Sendable {
     let supportsStreaming = true
     let supportsTools = false
 
-    let availableModels = [
+    /// Fallback models shown when Ollama is not reachable
+    var availableModels: [String] {
+        if !_fetchedModels.isEmpty {
+            return _fetchedModels.map(\.name)
+        }
+        return _fallbackModels
+    }
+
+    /// Fetched model metadata (includes size, etc.)
+    private(set) var _fetchedModels: [OllamaModelInfo] = []
+
+    /// Static fallback list — only used if Ollama is unreachable
+    private let _fallbackModels = [
         "llama3",
-        "llama3:70b",
-        "codellama",
+        "gemma3:latest",
         "mistral",
-        "mixtral",
-        "phi3",
-        "gemma:7b",
-        "llava"  // Vision model
+        "codellama",
+        "phi3"
     ]
 
     private let session = URLSession.shared
 
     /// Get the configured Ollama base URL (defaults to localhost)
-    private var baseURL: String {
+    var baseURL: String {
         let saved = KeychainService.shared.load(key: KeychainService.ollamaBaseURL)
         if let url = saved, !url.isEmpty {
             return url.hasSuffix("/") ? String(url.dropLast()) : url
         }
         return "http://localhost:11434"
+    }
+
+    // MARK: - Fetch Available Models
+
+    /// Fetches locally installed models from Ollama's /api/tags endpoint.
+    /// Filters out embedding models automatically.
+    /// - Returns: Array of OllamaModelInfo for chat-capable models
+    /// - Throws: AIProviderError if connection fails or response is invalid
+    func fetchAvailableModels() async throws -> [OllamaModelInfo] {
+        let endpoint = "\(baseURL)/api/tags"
+        guard let url = URL(string: endpoint) else {
+            throw AIProviderError.serverError(statusCode: 0, message: "Invalid Ollama URL: \(endpoint)")
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+
+        do {
+            let (data, response) = try await session.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw AIProviderError.invalidResponse(provider: displayName, detail: "Not an HTTP response")
+            }
+
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorText = String(data: data, encoding: .utf8) ?? "Unknown error"
+                throw AIProviderError.serverError(statusCode: httpResponse.statusCode, message: errorText)
+            }
+
+            let tagResponse = try JSONDecoder().decode(OllamaTagResponse.self, from: data)
+
+            // Filter out embedding models
+            let chatModels = tagResponse.models.filter { !$0.isEmbeddingModel }
+
+            // Cache the fetched models
+            _fetchedModels = chatModels
+
+            return chatModels
+        } catch let error as AIProviderError {
+            throw error
+        } catch let error as DecodingError {
+            throw AIProviderError.invalidResponse(
+                provider: displayName,
+                detail: "Invalid JSON from Ollama: \(error.localizedDescription)"
+            )
+        } catch {
+            let nsError = error as NSError
+            if nsError.code == NSURLErrorCannotConnectToHost ||
+               nsError.code == NSURLErrorTimedOut ||
+               nsError.code == NSURLErrorNetworkConnectionLost ||
+               nsError.domain == NSURLErrorDomain {
+                throw AIProviderError.serverError(
+                    statusCode: 0,
+                    message: "Cannot connect to Ollama at \(baseURL). Is Ollama running? Start it with 'ollama serve'."
+                )
+            }
+            throw AIProviderError.networkError(underlying: error)
+        }
     }
 
     // MARK: - Send Message (Non-Streaming)

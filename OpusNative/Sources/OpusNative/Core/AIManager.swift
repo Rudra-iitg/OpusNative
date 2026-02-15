@@ -29,6 +29,17 @@ final class AIManager {
     /// Per-provider settings cache
     private var providerSettings: [String: ModelSettings] = [:]
 
+    // MARK: - Ollama Dynamic Models
+
+    /// Fetched Ollama model metadata (name, size, etc.)
+    var ollamaModels: [OllamaModelInfo] = []
+
+    /// Whether Ollama models are currently being fetched
+    var isLoadingOllamaModels: Bool = false
+
+    /// Error message from the last Ollama model fetch attempt
+    var ollamaModelError: String?
+
     private init() {
         let savedProvider = UserDefaults.standard.string(forKey: "activeProviderID") ?? "anthropic"
         self.activeProviderID = savedProvider
@@ -71,6 +82,11 @@ final class AIManager {
         } else {
             settings = loadSettingsFor(providerID: id)
         }
+
+        // Auto-fetch Ollama models when switching to Ollama
+        if id == "ollama" && ollamaModels.isEmpty {
+            Task { await fetchOllamaModels() }
+        }
     }
 
     /// Providers that are configured (have API keys set)
@@ -96,6 +112,53 @@ final class AIManager {
         default:
             return false
         }
+    }
+
+    // MARK: - Ollama Model Fetching
+
+    /// Fetch available Ollama models from the local /api/tags endpoint.
+    /// Updates `ollamaModels`, auto-selects first model if needed.
+    func fetchOllamaModels() async {
+        guard let ollamaProvider = provider(for: "ollama") as? OllamaProvider else { return }
+
+        isLoadingOllamaModels = true
+        ollamaModelError = nil
+
+        do {
+            let models = try await ollamaProvider.fetchAvailableModels()
+            ollamaModels = models
+
+            // Auto-select first model if current selection is invalid
+            if activeProviderID == "ollama" {
+                let modelNames = models.map(\.name)
+                if !modelNames.contains(settings.modelName), let first = modelNames.first {
+                    settings.modelName = first
+                }
+            }
+        } catch {
+            ollamaModelError = error.localizedDescription
+        }
+
+        isLoadingOllamaModels = false
+    }
+
+    /// Force refresh Ollama models, clearing cached data first
+    func refreshOllamaModels() async {
+        ollamaModels = []
+        await fetchOllamaModels()
+    }
+
+    /// Available models for the active provider — uses dynamic list for Ollama
+    var activeProviderModels: [String] {
+        if activeProviderID == "ollama" && !ollamaModels.isEmpty {
+            return ollamaModels.map(\.name)
+        }
+        return activeProvider?.availableModels ?? []
+    }
+
+    /// Get OllamaModelInfo for a specific model name (for size display)
+    func ollamaModelInfo(for name: String) -> OllamaModelInfo? {
+        ollamaModels.first { $0.name == name }
     }
 
     // MARK: - Settings Persistence
@@ -128,3 +191,4 @@ final class AIManager {
         register(provider: AWSBedrockProvider())
     }
 }
+

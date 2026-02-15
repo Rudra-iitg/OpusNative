@@ -153,22 +153,77 @@ struct ChatView: View {
 
             Divider().frame(height: 20)
 
-            // Model selector
+            // Model selector — dynamic for Ollama
             HStack(spacing: 8) {
                 Image(systemName: "cube")
                     .foregroundStyle(.white.opacity(0.5))
-                Picker("Model", selection: Binding(
-                    get: { aiManager.settings.modelName },
-                    set: { aiManager.settings.modelName = $0 }
-                )) {
-                    if let provider = aiManager.activeProvider {
-                        ForEach(provider.availableModels, id: \.self) { model in
-                            Text(model).tag(model)
+
+                if aiManager.isLoadingOllamaModels && aiManager.activeProviderID == "ollama" {
+                    // Loading state
+                    ProgressView()
+                        .controlSize(.small)
+                        .scaleEffect(0.7)
+                    Text("Loading models…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if aiManager.activeProviderID == "ollama" && aiManager.activeProviderModels.isEmpty {
+                    // No models state
+                    Label {
+                        Text("No models found")
+                            .font(.caption)
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                    }
+                } else {
+                    Picker("Model", selection: Binding(
+                        get: { aiManager.settings.modelName },
+                        set: { aiManager.settings.modelName = $0 }
+                    )) {
+                        let models = aiManager.activeProviderModels
+                        ForEach(models, id: \.self) { model in
+                            if aiManager.activeProviderID == "ollama",
+                               let info = aiManager.ollamaModelInfo(for: model) {
+                                HStack {
+                                    Text(model)
+                                    Spacer()
+                                    if info.isLargeModel {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .foregroundStyle(.orange)
+                                    }
+                                    Text(info.formattedSize)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .tag(model)
+                            } else {
+                                Text(model).tag(model)
+                            }
                         }
                     }
+                    .pickerStyle(.menu)
+                    .frame(maxWidth: 280)
                 }
-                .pickerStyle(.menu)
-                .frame(maxWidth: 280)
+
+                // Refresh button (Ollama only)
+                if aiManager.activeProviderID == "ollama" {
+                    Button {
+                        Task { await aiManager.refreshOllamaModels() }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(aiManager.isLoadingOllamaModels)
+                    .help("Refresh Ollama models")
+                }
+            }
+
+            // Ollama error tooltip
+            if let error = aiManager.ollamaModelError, aiManager.activeProviderID == "ollama" {
+                Image(systemName: "exclamationmark.circle.fill")
+                    .foregroundStyle(.red)
+                    .help(error)
             }
 
             Spacer()
@@ -208,6 +263,12 @@ struct ChatView: View {
                 .environment(\.colorScheme, .dark)
                 .overlay(Rectangle().fill(Color.white.opacity(0.02)))
         )
+        .task {
+            // Auto-fetch Ollama models on view appearance when Ollama is active
+            if aiManager.activeProviderID == "ollama" && aiManager.ollamaModels.isEmpty {
+                await aiManager.fetchOllamaModels()
+            }
+        }
     }
 
     private func capabilityBadge(_ icon: String, _ label: String) -> some View {

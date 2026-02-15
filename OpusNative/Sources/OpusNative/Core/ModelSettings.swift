@@ -56,7 +56,7 @@ struct ModelSettings: Sendable, Codable {
                 temperature: 0.7,
                 maxTokens: 4096,
                 topP: 1.0,
-                modelName: "llama3",
+                modelName: "",
                 useStreaming: true
             )
         case "bedrock":
