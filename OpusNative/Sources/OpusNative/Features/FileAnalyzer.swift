@@ -103,4 +103,11 @@ final class FileAnalyzer {
 
         isAnalyzing = false
     }
+
+    /// Clear analysis results
+    func clear() {
+        selectedFileName = ""
+        analysisResult = ""
+        errorMessage = nil
+    }
 }

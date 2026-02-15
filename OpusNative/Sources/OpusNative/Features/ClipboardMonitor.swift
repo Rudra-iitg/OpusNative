@@ -97,4 +97,12 @@ final class ClipboardMonitor {
 
         isAnalyzing = false
     }
+
+    /// Clear clipboard content and analysis results
+    func clear() {
+        clipboardContent = ""
+        contentType = .empty
+        analysisResult = ""
+        errorMessage = nil
+    }
 }

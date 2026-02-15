@@ -8,6 +8,10 @@ struct ToolsView: View {
     @State private var selectedTool: ToolType = .files
 
     private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)
+    private let accentGradient = LinearGradient(
+        colors: [Color(red: 0.56, green: 0.44, blue: 1.0), Color(red: 0.36, green: 0.24, blue: 0.95)],
+        startPoint: .leading, endPoint: .trailing
+    )
 
     enum ToolType: String, CaseIterable, Identifiable {
         case files = "File Analyzer"
@@ -24,17 +28,19 @@ struct ToolsView: View {
         }
     }
 
+    /// Current provider name and model for display
+    private var activeProviderName: String {
+        AIManager.shared.activeProvider?.displayName ?? "No Provider"
+    }
+
+    private var activeModelName: String {
+        AIManager.shared.settings.modelName
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack {
-                Image(systemName: "wrench.and.screwdriver")
-                    .foregroundStyle(accentColor)
-                Text("System Tools")
-                    .font(.title2.weight(.semibold))
-                Spacer()
-            }
-            .padding(20)
+            headerSection
 
             // Tool tabs
             HStack(spacing: 0) {
@@ -85,13 +91,59 @@ struct ToolsView: View {
             .padding(24)
         }
         .background(
-            LinearGradient(
-                colors: [Color(red: 0.08, green: 0.08, blue: 0.12), Color(red: 0.05, green: 0.05, blue: 0.08)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            ZStack {
+                LinearGradient(
+                    colors: [Color(red: 0.07, green: 0.07, blue: 0.12), Color(red: 0.04, green: 0.04, blue: 0.09)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                RadialGradient(
+                    colors: [accentColor.opacity(0.04), .clear],
+                    center: .top,
+                    startRadius: 50,
+                    endRadius: 400
+                )
+            }
             .ignoresSafeArea()
         )
+    }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(accentColor.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: "wrench.and.screwdriver.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(accentColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("System Tools")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                HStack(spacing: 6) {
+                    Text("Using")
+                        .foregroundStyle(.white.opacity(0.35))
+                    Text(activeProviderName)
+                        .foregroundStyle(accentColor.opacity(0.8))
+                    if !activeModelName.isEmpty {
+                        Text("·")
+                            .foregroundStyle(.white.opacity(0.25))
+                        Text(activeModelName)
+                            .foregroundStyle(.white.opacity(0.45))
+                    }
+                }
+                .font(.caption)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
     }
 
     // MARK: - File Analyzer
@@ -135,7 +187,12 @@ struct ToolsView: View {
             }
 
             if !fileAnalyzer.analysisResult.isEmpty {
-                resultCard(title: fileAnalyzer.selectedFileName, content: fileAnalyzer.analysisResult)
+                resultCard(
+                    title: fileAnalyzer.selectedFileName,
+                    content: fileAnalyzer.analysisResult,
+                    icon: "doc.text.fill",
+                    onClear: { withAnimation { fileAnalyzer.clear() } }
+                )
             }
         }
     }
@@ -144,7 +201,7 @@ struct ToolsView: View {
 
     private var clipboardContent: some View {
         VStack(spacing: 20) {
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button {
                     clipboardMonitor.readClipboard()
                 } label: {
@@ -152,7 +209,7 @@ struct ToolsView: View {
                         .font(.callout.weight(.medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.08)))
                 }
                 .buttonStyle(.plain)
 
@@ -160,11 +217,11 @@ struct ToolsView: View {
                     Task { await clipboardMonitor.analyzeClipboard() }
                 } label: {
                     Label("Analyze", systemImage: "brain")
-                        .font(.callout.weight(.medium))
+                        .font(.callout.weight(.semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 10).fill(accentColor))
+                        .background(RoundedRectangle(cornerRadius: 12).fill(accentGradient))
                 }
                 .buttonStyle(.plain)
             }
@@ -175,7 +232,40 @@ struct ToolsView: View {
                         Text("Clipboard Content")
                             .font(.callout.weight(.medium))
                             .foregroundStyle(.white.opacity(0.7))
-                        ProviderBadge(providerID: clipboardMonitor.contentType.rawValue)
+
+                        // Content type badge
+                        Text(clipboardMonitor.contentType.rawValue)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule().fill(accentColor.opacity(0.3))
+                            )
+
+                        Spacer()
+
+                        // Clear clipboard button
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                clipboardMonitor.clear()
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "xmark.circle.fill")
+                                Text("Clear")
+                            }
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.5))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.06))
+                                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.08)))
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
 
                     Text(clipboardMonitor.clipboardContent.prefix(500))
@@ -185,14 +275,19 @@ struct ToolsView: View {
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
-                            RoundedRectangle(cornerRadius: 10)
+                            RoundedRectangle(cornerRadius: 12)
                                 .fill(Color.black.opacity(0.3))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .strokeBorder(Color.white.opacity(0.06))
+                                )
                         )
                 }
             }
 
             if clipboardMonitor.isAnalyzing {
-                ProgressView("Analyzing...").tint(accentColor)
+                ProgressView("Analyzing with \(activeProviderName)...")
+                    .tint(accentColor)
             }
 
             if let error = clipboardMonitor.errorMessage {
@@ -200,7 +295,12 @@ struct ToolsView: View {
             }
 
             if !clipboardMonitor.analysisResult.isEmpty {
-                resultCard(title: "Clipboard Analysis", content: clipboardMonitor.analysisResult)
+                resultCard(
+                    title: "Clipboard Analysis",
+                    content: clipboardMonitor.analysisResult,
+                    icon: "clipboard.fill",
+                    onClear: { withAnimation { clipboardMonitor.clear() } }
+                )
             }
         }
     }
@@ -209,7 +309,7 @@ struct ToolsView: View {
 
     private var screenshotContent: some View {
         VStack(spacing: 20) {
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button {
                     Task { await screenshotAnalyzer.captureScreen() }
                 } label: {
@@ -217,7 +317,7 @@ struct ToolsView: View {
                         .font(.callout.weight(.medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.08)))
                 }
                 .buttonStyle(.plain)
 
@@ -225,27 +325,43 @@ struct ToolsView: View {
                     Task { await screenshotAnalyzer.analyzeScreenshot() }
                 } label: {
                     Label("Analyze", systemImage: "brain")
-                        .font(.callout.weight(.medium))
+                        .font(.callout.weight(.semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 10).fill(accentColor))
+                        .background(RoundedRectangle(cornerRadius: 12).fill(accentGradient))
                 }
                 .buttonStyle(.plain)
                 .disabled(screenshotAnalyzer.capturedImage == nil)
             }
 
             if let image = screenshotAnalyzer.capturedImage {
-                Image(nsImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 250)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.1)))
+                VStack(spacing: 8) {
+                    Image(nsImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxHeight: 250)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.1)))
+
+                    // Clear screenshot
+                    Button {
+                        withAnimation { screenshotAnalyzer.clear() }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark.circle.fill")
+                            Text("Clear Screenshot")
+                        }
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.5))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             if screenshotAnalyzer.isAnalyzing {
-                ProgressView("Analyzing screenshot...").tint(accentColor)
+                ProgressView("Analyzing with \(activeProviderName)...")
+                    .tint(accentColor)
             }
 
             if let error = screenshotAnalyzer.errorMessage {
@@ -253,37 +369,95 @@ struct ToolsView: View {
             }
 
             if !screenshotAnalyzer.analysisResult.isEmpty {
-                resultCard(title: "Screenshot Analysis", content: screenshotAnalyzer.analysisResult)
+                resultCard(
+                    title: "Screenshot Analysis",
+                    content: screenshotAnalyzer.analysisResult,
+                    icon: "camera.fill",
+                    onClear: { withAnimation { screenshotAnalyzer.clear() } }
+                )
             }
         }
     }
 
     // MARK: - Result Card
 
-    private func resultCard(title: String, content: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
+    private func resultCard(title: String, content: String, icon: String, onClear: @escaping () -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header row
+            HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                 Text(title)
                     .font(.callout.weight(.semibold))
                     .foregroundStyle(.white)
+
                 Spacer()
+
+                // Provider & model badge
+                HStack(spacing: 4) {
+                    Image(systemName: "cpu")
+                        .font(.system(size: 9))
+                    Text("\(activeProviderName) · \(activeModelName)")
+                        .lineLimit(1)
+                }
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.4))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule()
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.06)))
+                )
+            }
+
+            // Action buttons row
+            HStack(spacing: 8) {
+                Spacer()
+
                 Button {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(content, forType: .string)
                 } label: {
-                    Label("Copy", systemImage: "doc.on.doc")
-                        .font(.caption)
+                    HStack(spacing: 4) {
+                        Image(systemName: "doc.on.doc")
+                        Text("Copy")
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(Color.white.opacity(0.06))
+                            .overlay(Capsule().strokeBorder(Color.white.opacity(0.08)))
+                    )
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .tint(.white.opacity(0.5))
+                .buttonStyle(.plain)
+
+                Button(action: onClear) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "trash")
+                        Text("Clear")
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.red.opacity(0.7))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(Color.red.opacity(0.06))
+                            .overlay(Capsule().strokeBorder(Color.red.opacity(0.12)))
+                    )
+                }
+                .buttonStyle(.plain)
             }
 
+            // Content
             Text(content)
                 .textSelection(.enabled)
                 .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(3)
                 .padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
@@ -291,11 +465,16 @@ struct ToolsView: View {
                         .fill(Color.white.opacity(0.03))
                 )
         }
-        .padding(16)
+        .padding(18)
         .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.04))
-                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.06)))
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .environment(\.colorScheme, .dark)
+                .opacity(0.6)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.white.opacity(0.06))
         )
     }
 }
