@@ -88,6 +88,14 @@ final class ScreenshotAnalyzer {
             let settings = AIManager.shared.settings
             let response = try await provider.sendMessage(imagePrompt, conversation: [], settings: settings)
             analysisResult = response.content
+
+            // Persist for S3 backup
+            S3BackupManager.saveToolAnalysis(
+                type: "screenshot",
+                title: "Screenshot Analysis",
+                content: response.content,
+                toKey: "screenshotAnalysisHistory"
+            )
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -7,11 +7,14 @@ struct ToolsView: View {
     @State private var screenshotAnalyzer = ScreenshotAnalyzer()
     @State private var selectedTool: ToolType = .files
 
-    private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)
-    private let accentGradient = LinearGradient(
-        colors: [Color(red: 0.56, green: 0.44, blue: 1.0), Color(red: 0.36, green: 0.24, blue: 0.95)],
-        startPoint: .leading, endPoint: .trailing
-    )
+    private var accentColor: Color { ThemeManager.shared.accent }
+
+    private var accentGradient: LinearGradient {
+        LinearGradient(
+            colors: [ThemeManager.shared.accent, ThemeManager.shared.accentDark],
+            startPoint: .leading, endPoint: .trailing
+        )
+    }
 
     enum ToolType: String, CaseIterable, Identifiable {
         case files = "File Analyzer"

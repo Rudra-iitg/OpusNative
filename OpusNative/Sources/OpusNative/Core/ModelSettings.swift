@@ -67,6 +67,22 @@ struct ModelSettings: Sendable, Codable {
                 modelName: "us.anthropic.claude-sonnet-4-20250514-v1:0",
                 useStreaming: true
             )
+        case "gemini":
+            return ModelSettings(
+                temperature: 0.7,
+                maxTokens: 4096,
+                topP: 1.0,
+                modelName: "gemini-2.5-flash-preview-05-20",
+                useStreaming: false
+            )
+        case "grok":
+            return ModelSettings(
+                temperature: 0.7,
+                maxTokens: 4096,
+                topP: 1.0,
+                modelName: "grok-3",
+                useStreaming: false
+            )
         default:
             return ModelSettings()
         }

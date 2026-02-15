@@ -79,6 +79,12 @@ extension KeychainService {
     // HuggingFace
     static let huggingfaceToken = "huggingface-token"
 
+    // Gemini
+    static let geminiAPIKey = "gemini-api-key"
+
+    // Grok (xAI)
+    static let grokAPIKey = "grok-api-key"
+
     // Ollama
     static let ollamaBaseURL = "ollama-base-url"
 

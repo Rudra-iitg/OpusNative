@@ -5,7 +5,7 @@ import MarkdownUI
 struct CodeAssistantView: View {
     @Bindable var assistant: CodeAssistant
 
-    private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)
+    private var accentColor: Color { ThemeManager.shared.accent }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -167,6 +167,7 @@ struct CodeAssistantView: View {
                 .frame(minWidth: 300)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             LinearGradient(
                 colors: [Color(red: 0.08, green: 0.08, blue: 0.12), Color(red: 0.05, green: 0.05, blue: 0.08)],

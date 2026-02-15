@@ -22,7 +22,7 @@ struct ToastView: View {
             switch self {
             case .success: return .green
             case .error: return .red
-            case .info: return Color(red: 0.56, green: 0.44, blue: 1.0)
+            case .info: return ThemeManager.shared.accent
             case .warning: return .orange
             }
         }

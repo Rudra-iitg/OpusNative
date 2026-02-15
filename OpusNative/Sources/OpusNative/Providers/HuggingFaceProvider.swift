@@ -14,13 +14,13 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
     let availableModels = [
         "mistralai/Mistral-7B-Instruct-v0.2",
         "meta-llama/Llama-2-7b-chat-hf",
-        "google/flan-t5-xxl",
-        "bigscience/bloom-560m",
+        "meta-llama/Meta-Llama-3-8B-Instruct",
+        "microsoft/Phi-3-mini-4k-instruct",
         "tiiuae/falcon-7b-instruct",
         "HuggingFaceH4/zephyr-7b-beta"
     ]
 
-    private let baseURL = "https://api-inference.huggingface.co/models"
+    private let baseURL = "https://router.huggingface.co/v1"
     private let session = URLSession.shared
 
     // MARK: - Send Message
@@ -33,7 +33,7 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
         let token = try getToken()
         let startTime = CFAbsoluteTimeGetCurrent()
 
-        let endpoint = "\(baseURL)/\(settings.modelName)"
+        let endpoint = "\(baseURL)/chat/completions"
         guard let url = URL(string: endpoint) else {
             throw AIProviderError.modelNotAvailable(model: settings.modelName)
         }
@@ -43,17 +43,26 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        // Build prompt from conversation + message
-        let prompt = buildPrompt(message: message, conversation: conversation, systemPrompt: settings.systemPrompt)
+        // Build messages array (OpenAI-compatible format)
+        var messages: [[String: String]] = []
+
+        if !settings.systemPrompt.isEmpty {
+            messages.append(["role": "system", "content": settings.systemPrompt])
+        }
+
+        for msg in conversation {
+            messages.append(["role": msg.role, "content": msg.content])
+        }
+
+        messages.append(["role": "user", "content": message])
 
         let body: [String: Any] = [
-            "inputs": prompt,
-            "parameters": [
-                "max_new_tokens": settings.maxTokens,
-                "temperature": max(settings.temperature, 0.01),  // HF doesn't accept 0
-                "top_p": settings.topP,
-                "return_full_text": false
-            ]
+            "model": settings.modelName,
+            "messages": messages,
+            "max_tokens": settings.maxTokens,
+            "temperature": max(settings.temperature, 0.01),
+            "top_p": settings.topP,
+            "stream": false
         ]
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -67,12 +76,12 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
 
         try handleHTTPErrors(httpResponse, data: data)
 
-        // HuggingFace returns varying formats — normalize
+        // Parse OpenAI-compatible response
         let content = try parseResponse(data: data)
 
         return AIResponse(
             content: content,
-            tokenCount: nil,  // HF doesn't always return token counts
+            tokenCount: nil,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
@@ -90,51 +99,27 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
         return token
     }
 
-    private func buildPrompt(message: String, conversation: [MessageDTO], systemPrompt: String) -> String {
-        var parts: [String] = []
-
-        if !systemPrompt.isEmpty {
-            parts.append("[INST] <<SYS>>\n\(systemPrompt)\n<</SYS>>")
-        }
-
-        for msg in conversation {
-            if msg.role == "user" {
-                parts.append("[INST] \(msg.content) [/INST]")
-            } else {
-                parts.append(msg.content)
-            }
-        }
-
-        parts.append("[INST] \(message) [/INST]")
-
-        return parts.joined(separator: "\n")
-    }
-
     private func parseResponse(data: Data) throws -> String {
-        // Format 1: Array of objects with "generated_text"
+        // Format 1: OpenAI-compatible (router.huggingface.co/v1)
+        if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let choices = dict["choices"] as? [[String: Any]],
+           let first = choices.first,
+           let message = first["message"] as? [String: Any],
+           let content = message["content"] as? String {
+            return content.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        // Format 2: Array of objects with "generated_text"
         if let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
            let first = array.first,
            let text = first["generated_text"] as? String {
             return text.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
-        // Format 2: Single object with "generated_text"
+        // Format 3: Single object with "generated_text"
         if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let text = dict["generated_text"] as? String {
             return text.trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-
-        // Format 3: Array of arrays (some models)
-        if let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-           let first = array.first,
-           let text = first["translation_text"] as? String {
-            return text.trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-
-        // Format 4: Conversational format
-        if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let generated = dict["generated_text"] as? String {
-            return generated.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
         // Fallback: try raw string

@@ -29,5 +29,6 @@ struct OpusNativeApp: App {
         Settings {
             SettingsView()
         }
+        .modelContainer(sharedModelContainer)
     }
 }

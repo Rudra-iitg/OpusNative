@@ -10,7 +10,7 @@ struct MessageBubbleView: View {
     @State private var isHovered: Bool = false
     @State private var showCopied: Bool = false
 
-    private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)
+    private var accentColor: Color { ThemeManager.shared.accent }
 
     var body: some View {
         HStack(alignment: .top) {

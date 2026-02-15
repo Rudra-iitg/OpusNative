@@ -107,6 +107,11 @@ final class ChatViewModel {
 
                 try? modelContext.save()
 
+                // Trigger auto-backup if enabled
+                Task {
+                    await S3BackupManager.shared.autoBackupIfNeeded(modelContext: modelContext)
+                }
+
                 streamingText = ""
                 isStreaming = false
             } catch {

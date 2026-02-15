@@ -8,7 +8,7 @@ struct SidebarView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Conversation.updatedAt, order: .reverse) private var conversations: [Conversation]
 
-    private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)  // Purple accent
+    private var accentColor: Color { ThemeManager.shared.accent }  // Dynamic accent
 
     var body: some View {
         List(selection: $selectedNav) {
@@ -96,6 +96,8 @@ struct ProviderBadge: View {
         case "huggingface": return Color(red: 1.0, green: 0.82, blue: 0.24) // Yellow
         case "ollama": return Color(red: 0.40, green: 0.65, blue: 0.95) // Blue
         case "bedrock": return Color(red: 0.95, green: 0.60, blue: 0.18) // Orange
+        case "gemini": return Color(red: 0.35, green: 0.60, blue: 1.0) // Google Blue
+        case "grok": return Color(red: 0.85, green: 0.30, blue: 0.30) // Red
         default: return .gray
         }
     }
@@ -107,6 +109,8 @@ struct ProviderBadge: View {
         case "huggingface": return compact ? "HF" : "HuggingFace"
         case "ollama": return compact ? "OL" : "Ollama"
         case "bedrock": return compact ? "BR" : "Bedrock"
+        case "gemini": return compact ? "GM" : "Gemini"
+        case "grok": return compact ? "GK" : "Grok"
         default: return compact ? "?" : providerID
         }
     }

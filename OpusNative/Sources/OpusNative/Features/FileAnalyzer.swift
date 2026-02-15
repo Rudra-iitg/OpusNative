@@ -97,6 +97,14 @@ final class FileAnalyzer {
             let settings = AIManager.shared.settings
             let response = try await provider.sendMessage(prompt, conversation: [], settings: settings)
             analysisResult = response.content
+
+            // Persist for S3 backup
+            S3BackupManager.saveToolAnalysis(
+                type: "file",
+                title: fileName,
+                content: response.content,
+                toKey: "fileAnalysisHistory"
+            )
         } catch {
             errorMessage = error.localizedDescription
         }

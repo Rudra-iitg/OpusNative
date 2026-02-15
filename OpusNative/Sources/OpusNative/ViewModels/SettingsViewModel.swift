@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 /// ViewModel for the Settings view.
 /// Manages all provider API keys, model settings, and appearance preferences.
@@ -9,6 +10,8 @@ final class SettingsViewModel {
     var anthropicKey: String = ""
     var openaiKey: String = ""
     var huggingfaceToken: String = ""
+    var geminiKey: String = ""
+    var grokKey: String = ""
     var ollamaBaseURL: String = "http://localhost:11434"
 
     // AWS Bedrock
@@ -38,13 +41,50 @@ final class SettingsViewModel {
     // Status
     var saveStatus: String = ""
 
-    static let regions = ["us-east-1", "us-west-2", "eu-west-1", "ap-northeast-1"]
+    // SwiftData context (set from view)
+    var modelContext: ModelContext?
+
+    static let regions = [
+        // US
+        "us-east-1",       // N. Virginia
+        "us-east-2",       // Ohio
+        "us-west-1",       // N. California
+        "us-west-2",       // Oregon
+        // India
+        "ap-south-1",      // Mumbai
+        "ap-south-2",      // Hyderabad
+        // Asia Pacific
+        "ap-northeast-1",  // Tokyo
+        "ap-northeast-2",  // Seoul
+        "ap-northeast-3",  // Osaka
+        "ap-southeast-1",  // Singapore
+        "ap-southeast-2",  // Sydney
+        "ap-east-1",       // Hong Kong
+        // Europe
+        "eu-west-1",       // Ireland
+        "eu-west-2",       // London
+        "eu-west-3",       // Paris
+        "eu-central-1",    // Frankfurt
+        "eu-central-2",    // Zurich
+        "eu-north-1",      // Stockholm
+        "eu-south-1",      // Milan
+        // Middle East & Africa
+        "me-south-1",      // Bahrain
+        "me-central-1",    // UAE
+        "af-south-1",      // Cape Town
+        // South America
+        "sa-east-1",       // São Paulo
+        // Canada
+        "ca-central-1",    // Canada
+    ]
 
     func loadSettings() {
         // Provider keys
         anthropicKey = KeychainService.shared.load(key: KeychainService.anthropicAPIKey) ?? ""
         openaiKey = KeychainService.shared.load(key: KeychainService.openaiAPIKey) ?? ""
         huggingfaceToken = KeychainService.shared.load(key: KeychainService.huggingfaceToken) ?? ""
+        geminiKey = KeychainService.shared.load(key: KeychainService.geminiAPIKey) ?? ""
+        grokKey = KeychainService.shared.load(key: KeychainService.grokAPIKey) ?? ""
         ollamaBaseURL = KeychainService.shared.load(key: KeychainService.ollamaBaseURL) ?? "http://localhost:11434"
 
         // Bedrock
@@ -85,6 +125,12 @@ final class SettingsViewModel {
         }
         if !huggingfaceToken.isEmpty {
             allSaved = KeychainService.shared.save(key: KeychainService.huggingfaceToken, value: huggingfaceToken) && allSaved
+        }
+        if !geminiKey.isEmpty {
+            allSaved = KeychainService.shared.save(key: KeychainService.geminiAPIKey, value: geminiKey) && allSaved
+        }
+        if !grokKey.isEmpty {
+            allSaved = KeychainService.shared.save(key: KeychainService.grokAPIKey, value: grokKey) && allSaved
         }
         if !ollamaBaseURL.isEmpty {
             allSaved = KeychainService.shared.save(key: KeychainService.ollamaBaseURL, value: ollamaBaseURL) && allSaved

@@ -1,12 +1,14 @@
 import SwiftUI
+import SwiftData
 import UniformTypeIdentifiers
 
 /// Comprehensive settings view with tabs for each provider, model settings, backup, and appearance.
 struct SettingsView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var viewModel = SettingsViewModel()
     @State private var selectedTab: SettingsTab = .providers
 
-    private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)
+    private var accentColor: Color { ThemeManager.shared.accent }
 
     enum SettingsTab: String, CaseIterable, Identifiable {
         case providers = "Providers"
@@ -123,7 +125,10 @@ struct SettingsView: View {
             )
             .ignoresSafeArea()
         )
-        .onAppear { viewModel.loadSettings() }
+        .onAppear {
+            viewModel.modelContext = modelContext
+            viewModel.loadSettings()
+        }
     }
 
     // MARK: - Provider Settings
@@ -144,6 +149,14 @@ struct SettingsView: View {
 
             settingsCard(title: "HuggingFace", icon: "text.magnifyingglass") {
                 secureField("Access Token", text: $viewModel.huggingfaceToken)
+            }
+
+            settingsCard(title: "Google Gemini", icon: "sparkles") {
+                secureField("API Key", text: $viewModel.geminiKey)
+            }
+
+            settingsCard(title: "Grok (xAI)", icon: "bolt.fill") {
+                secureField("API Key", text: $viewModel.grokKey)
             }
 
             settingsCard(title: "Ollama (Local)", icon: "desktopcomputer") {
@@ -279,6 +292,7 @@ struct SettingsView: View {
                 .font(.headline)
                 .foregroundStyle(.white)
 
+            // S3 Configuration Card
             settingsCard(title: "S3 Configuration", icon: "externaldrive.badge.icloud") {
                 VStack(spacing: 12) {
                     secureField("S3 Access Key", text: $viewModel.s3AccessKey)
@@ -304,6 +318,198 @@ struct SettingsView: View {
                 }
             }
 
+            // Auto-Backup Card
+            settingsCard(title: "Auto-Backup", icon: "arrow.triangle.2.circlepath") {
+                VStack(alignment: .leading, spacing: 12) {
+                    Toggle(isOn: Binding(
+                        get: { S3BackupManager.shared.autoBackupEnabled },
+                        set: { S3BackupManager.shared.autoBackupEnabled = $0 }
+                    )) {
+                        Text("Enable auto-backup after chat sessions")
+                            .font(.callout)
+                    }
+                    .toggleStyle(.switch)
+                    .tint(accentColor)
+
+                    if S3BackupManager.shared.autoBackupEnabled {
+                        HStack {
+                            Text("Backup interval")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.5))
+                            Picker("", selection: Binding(
+                                get: { S3BackupManager.shared.autoBackupIntervalMinutes },
+                                set: { S3BackupManager.shared.autoBackupIntervalMinutes = $0 }
+                            )) {
+                                Text("Every 15 min").tag(15)
+                                Text("Every 30 min").tag(30)
+                                Text("Every 1 hour").tag(60)
+                                Text("Every 6 hours").tag(360)
+                                Text("Every 24 hours").tag(1440)
+                            }
+                            .pickerStyle(.menu)
+                        }
+                    }
+
+                    if let lastDate = S3BackupManager.shared.lastBackupDate {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                                .font(.caption)
+                            Text("Last backup: \(lastDate.formatted(date: .abbreviated, time: .shortened))")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
+                    }
+                }
+            }
+
+            // Manual Backup Card
+            settingsCard(title: "Backup Now", icon: "icloud.and.arrow.up") {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Encrypt and upload all conversations, clipboard analyses, file analyses, and screenshot results to S3.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.4))
+
+                    if S3BackupManager.shared.isBackingUp {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ProgressView(value: S3BackupManager.shared.progress)
+                                .tint(accentColor)
+                            Text(S3BackupManager.shared.statusMessage)
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                    } else {
+                        Button {
+                            Task {
+                                if let context = viewModel.modelContext {
+                                    await S3BackupManager.shared.backup(modelContext: context)
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "arrow.up.circle.fill")
+                                Text("Backup All Data")
+                            }
+                            .font(.callout.weight(.medium))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(RoundedRectangle(cornerRadius: 10).fill(accentColor))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!S3BackupManager.shared.isConfigured)
+                    }
+
+                    if !S3BackupManager.shared.statusMessage.isEmpty && !S3BackupManager.shared.isBackingUp {
+                        Text(S3BackupManager.shared.statusMessage)
+                            .font(.caption)
+                            .foregroundStyle(S3BackupManager.shared.statusMessage.contains("✓") ? .green : .white.opacity(0.5))
+                    }
+                }
+            }
+
+            // Restore Card
+            settingsCard(title: "Restore from S3", icon: "icloud.and.arrow.down") {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Download and merge a backup from a specific date. Existing conversations are preserved — only new data is added.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.4))
+
+                    Button {
+                        Task { await S3BackupManager.shared.listBackupDates() }
+                    } label: {
+                        HStack {
+                            if S3BackupManager.shared.isListingBackups {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text("Loading...")
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Load Available Backups")
+                            }
+                        }
+                        .font(.callout.weight(.medium))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!S3BackupManager.shared.isConfigured || S3BackupManager.shared.isListingBackups)
+
+                    if !S3BackupManager.shared.availableBackups.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Available Backups")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.white.opacity(0.6))
+
+                            ForEach(S3BackupManager.shared.availableBackups) { backup in
+                                HStack {
+                                    Image(systemName: "clock.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(accentColor)
+                                    Text(backup.displayDate)
+                                        .font(.callout)
+                                    Spacer()
+
+                                    Button {
+                                        Task {
+                                            if let context = viewModel.modelContext {
+                                                await S3BackupManager.shared.restore(date: backup.date, modelContext: context)
+                                            }
+                                        }
+                                    } label: {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.down.circle.fill")
+                                            Text("Restore")
+                                        }
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 5)
+                                        .background(Capsule().fill(accentColor.opacity(0.6)))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.white.opacity(0.03))
+                                )
+                            }
+                        }
+                    }
+
+                    if S3BackupManager.shared.isRestoring {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ProgressView(value: S3BackupManager.shared.progress)
+                                .tint(.green)
+                            Text(S3BackupManager.shared.statusMessage)
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                    }
+
+                    if let error = S3BackupManager.shared.errorMessage {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.red)
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red.opacity(0.8))
+                        }
+                    }
+
+                    if !S3BackupManager.shared.isRestoring,
+                       S3BackupManager.shared.statusMessage.contains("Restored") {
+                        Text(S3BackupManager.shared.statusMessage)
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                    }
+                }
+            }
+
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield")
                     .foregroundStyle(.green)
@@ -321,6 +527,54 @@ struct SettingsView: View {
             Text("Chat Appearance")
                 .font(.headline)
                 .foregroundStyle(.white)
+
+            // Accent Color Picker
+            settingsCard(title: "Accent Color", icon: "paintpalette") {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Theme color applied across the entire app")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.4))
+
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 6), spacing: 12) {
+                        ForEach(ThemeManager.themes) { theme in
+                            Button {
+                                withAnimation(.spring(response: 0.3)) {
+                                    ThemeManager.shared.currentThemeIndex = theme.id
+                                }
+                            } label: {
+                                VStack(spacing: 6) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(theme.color)
+                                            .frame(width: 36, height: 36)
+                                            .shadow(color: theme.color.opacity(
+                                                ThemeManager.shared.currentThemeIndex == theme.id ? 0.6 : 0
+                                            ), radius: 8)
+
+                                        if ThemeManager.shared.currentThemeIndex == theme.id {
+                                            Circle()
+                                                .strokeBorder(.white, lineWidth: 2.5)
+                                                .frame(width: 36, height: 36)
+
+                                            Image(systemName: "checkmark")
+                                                .font(.caption.weight(.bold))
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+
+                                    Text(theme.name)
+                                        .font(.caption2)
+                                        .foregroundStyle(
+                                            ThemeManager.shared.currentThemeIndex == theme.id
+                                                ? .white : .white.opacity(0.4)
+                                        )
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
 
             settingsCard(title: "Background Image", icon: "photo") {
                 VStack(alignment: .leading, spacing: 12) {

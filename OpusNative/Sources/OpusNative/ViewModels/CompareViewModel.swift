@@ -2,15 +2,29 @@ import Foundation
 
 // MARK: - Compare View Model
 
-/// Sends the same prompt to multiple selected providers concurrently and collects results.
+/// Sends the same prompt to multiple selected models concurrently and collects results.
 @Observable
 @MainActor
 final class CompareViewModel {
     var prompt: String = ""
-    var selectedProviderIDs: Set<String> = []
+    var entries: [CompareEntry] = []  // Models to compare
     var results: [CompareResult] = []
     var isComparing = false
     var errorMessage: String?
+
+    // MARK: - Data Types
+
+    /// A single model added for comparison
+    struct CompareEntry: Identifiable, Equatable {
+        let id = UUID()
+        let providerID: String
+        let providerName: String
+        let modelName: String
+
+        static func == (lhs: CompareEntry, rhs: CompareEntry) -> Bool {
+            lhs.providerID == rhs.providerID && lhs.modelName == rhs.modelName
+        }
+    }
 
     struct CompareResult: Identifiable {
         let id = UUID()
@@ -26,16 +40,50 @@ final class CompareViewModel {
         var isSuccess: Bool { error == nil }
     }
 
-    /// Toggle a provider for comparison
-    func toggleProvider(_ id: String) {
-        if selectedProviderIDs.contains(id) {
-            selectedProviderIDs.remove(id)
-        } else {
-            selectedProviderIDs.insert(id)
+    // MARK: - Entry Management
+
+    /// All configured providers the user can add from
+    var configuredProviders: [(any AIProvider)] {
+        AIManager.shared.providers.filter { AIManager.shared.isProviderConfigured($0.id) }
+    }
+
+    /// Get available models for a provider
+    func modelsForProvider(_ id: String) -> [String] {
+        let aiManager = AIManager.shared
+        if id == "ollama" && !aiManager.ollamaModels.isEmpty {
+            return aiManager.ollamaModels.map(\.name)
+        }
+        return aiManager.provider(for: id)?.availableModels ?? []
+    }
+
+    /// Add a model to the comparison
+    func addEntry(providerID: String, modelName: String) {
+        let provider = AIManager.shared.provider(for: providerID)
+        let entry = CompareEntry(
+            providerID: providerID,
+            providerName: provider?.displayName ?? providerID,
+            modelName: modelName
+        )
+        // Avoid exact duplicates
+        if !entries.contains(where: { $0.providerID == providerID && $0.modelName == modelName }) {
+            entries.append(entry)
         }
     }
 
-    /// Send the prompt to all selected providers concurrently
+    /// Remove an entry
+    func removeEntry(_ entry: CompareEntry) {
+        entries.removeAll { $0.id == entry.id }
+    }
+
+    // MARK: - Computed helpers for backward compat with compare logic
+
+    private var selectedProviderIDs: Set<String> {
+        Set(entries.map(\.providerID))
+    }
+
+    // MARK: - Compare
+
+    /// Send the prompt to all selected models concurrently
     func compare() async {
         let text = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
@@ -43,8 +91,8 @@ final class CompareViewModel {
             return
         }
 
-        guard selectedProviderIDs.count >= 2 else {
-            errorMessage = "Select at least 2 providers to compare."
+        guard entries.count >= 2 else {
+            errorMessage = "Add at least 2 models to compare."
             return
         }
 
@@ -53,14 +101,12 @@ final class CompareViewModel {
         errorMessage = nil
 
         let aiManager = AIManager.shared
-        let selectedProviders = aiManager.providers.filter { selectedProviderIDs.contains($0.id) }
 
-        // Ensure Ollama models are fetched for correct model name
-        if selectedProviderIDs.contains("ollama") && aiManager.ollamaModels.isEmpty {
+        // Ensure Ollama models are fetched
+        if entries.contains(where: { $0.providerID == "ollama" }) && aiManager.ollamaModels.isEmpty {
             await aiManager.fetchOllamaModels()
         }
 
-        // Collect results without rank first
         struct RawResult: Sendable {
             let providerID: String
             let providerName: String
@@ -74,15 +120,18 @@ final class CompareViewModel {
         var rawResults: [RawResult] = []
 
         await withTaskGroup(of: RawResult.self) { group in
-            for provider in selectedProviders {
-                // Use saved settings from UserDefaults (has correct model), not static defaults
-                let settings = self.loadSettings(for: provider.id, aiManager: aiManager)
-                let providerID = provider.id
-                let providerName = provider.displayName
-                let modelName = settings.modelName
+            for entry in entries {
+                guard let provider = aiManager.provider(for: entry.providerID) else { continue }
+
+                var settings = self.loadSettings(for: entry.providerID, aiManager: aiManager)
+                settings.modelName = entry.modelName
+
+                let providerID = entry.providerID
+                let providerName = entry.providerName
+                let modelName = entry.modelName
+
                 group.addTask {
                     let startTime = CFAbsoluteTimeGetCurrent()
-
                     do {
                         let response = try await provider.sendMessage(
                             text,
@@ -90,7 +139,6 @@ final class CompareViewModel {
                             settings: settings
                         )
                         let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
-
                         return RawResult(
                             providerID: providerID,
                             providerName: providerName,
@@ -144,19 +192,20 @@ final class CompareViewModel {
         errorMessage = nil
     }
 
+    func resetAll() {
+        entries = []
+        clear()
+    }
+
     // MARK: - Load Saved Settings
 
-    /// Load the user's saved settings for a provider (with correct model name).
-    /// Falls back to static defaults, but for Ollama ensures a valid model is set.
     private func loadSettings(for providerID: String, aiManager: AIManager) -> ModelSettings {
-        // Try loading from UserDefaults (persisted by AIManager)
         if let data = UserDefaults.standard.data(forKey: "modelSettings_\(providerID)"),
            let saved = try? JSONDecoder().decode(ModelSettings.self, from: data),
            !saved.modelName.isEmpty {
             return saved
         }
 
-        // Fallback: for Ollama, use first fetched model
         if providerID == "ollama" {
             var settings = ModelSettings.defaultFor(providerID: providerID)
             if let firstModel = aiManager.ollamaModels.first?.name {
@@ -170,4 +219,3 @@ final class CompareViewModel {
         return ModelSettings.defaultFor(providerID: providerID)
     }
 }
-

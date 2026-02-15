@@ -109,6 +109,10 @@ final class AIManager {
             let access = KeychainService.shared.load(key: KeychainService.accessKeyID)
             let secret = KeychainService.shared.load(key: KeychainService.secretAccessKey)
             return access != nil && secret != nil
+        case "gemini":
+            return KeychainService.shared.load(key: KeychainService.geminiAPIKey) != nil
+        case "grok":
+            return KeychainService.shared.load(key: KeychainService.grokAPIKey) != nil
         default:
             return false
         }
@@ -186,6 +190,8 @@ final class AIManager {
     private func registerDefaultProviders() {
         register(provider: AnthropicProvider())
         register(provider: OpenAIProvider())
+        register(provider: GeminiProvider())
+        register(provider: GrokProvider())
         register(provider: HuggingFaceProvider())
         register(provider: OllamaProvider())
         register(provider: AWSBedrockProvider())

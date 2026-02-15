@@ -3,12 +3,17 @@ import SwiftUI
 /// Premium side-by-side provider comparison view.
 struct CompareView: View {
     @Bindable var viewModel: CompareViewModel
+    @State private var showingAddModel = false
+    @State private var addPickerProvider: String? = nil
 
-    private let accentColor = Color(red: 0.56, green: 0.44, blue: 1.0)
-    private let accentGradient = LinearGradient(
-        colors: [Color(red: 0.56, green: 0.44, blue: 1.0), Color(red: 0.36, green: 0.24, blue: 0.95)],
-        startPoint: .leading, endPoint: .trailing
-    )
+    private var accentColor: Color { ThemeManager.shared.accent }
+
+    private var accentGradient: LinearGradient {
+        LinearGradient(
+            colors: [ThemeManager.shared.accent, ThemeManager.shared.accentDark],
+            startPoint: .leading, endPoint: .trailing
+        )
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,8 +24,8 @@ struct CompareView: View {
 
             ScrollView {
                 VStack(spacing: 20) {
-                    // Provider selector
-                    providerSelector
+                    // Model selector
+                    modelSelector
 
                     // Prompt input
                     promptInput
@@ -76,20 +81,20 @@ struct CompareView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Compare Providers")
+                Text("Compare Models")
                     .font(.title3.weight(.bold))
                     .foregroundStyle(.white)
-                Text("Send the same prompt to multiple AI providers")
+                Text("Add models and compare responses side by side")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.4))
             }
 
             Spacer()
 
-            if !viewModel.results.isEmpty {
+            if !viewModel.results.isEmpty || !viewModel.entries.isEmpty {
                 Button {
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.clear()
+                        viewModel.resetAll()
                     }
                 } label: {
                     HStack(spacing: 4) {
@@ -113,78 +118,247 @@ struct CompareView: View {
         .padding(.vertical, 16)
     }
 
-    // MARK: - Provider Selector
+    // MARK: - Model Selector (Chips + Add Button)
 
-    private var providerSelector: some View {
-        VStack(alignment: .leading, spacing: 10) {
+    private var modelSelector: some View {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Select Providers")
+                Text("Models")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white.opacity(0.6))
                 Spacer()
-                Text("\(viewModel.selectedProviderIDs.count) selected")
-                    .font(.caption)
-                    .foregroundStyle(accentColor.opacity(0.7))
-            }
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 170))], spacing: 10) {
-                ForEach(AIManager.shared.providers, id: \.id) { provider in
-                    let isSelected = viewModel.selectedProviderIDs.contains(provider.id)
-                    let isConfigured = AIManager.shared.isProviderConfigured(provider.id)
-
-                    Button {
-                        if isConfigured {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                viewModel.toggleProvider(provider.id)
-                            }
-                        }
-                    } label: {
-                        HStack(spacing: 10) {
-                            ProviderBadge(providerID: provider.id)
-
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(provider.displayName)
-                                    .font(.callout.weight(.medium))
-                                    .foregroundStyle(isConfigured ? .white : .white.opacity(0.3))
-                                    .lineLimit(1)
-                                if !isConfigured {
-                                    Text("Not configured")
-                                        .font(.caption2)
-                                        .foregroundStyle(.orange.opacity(0.6))
-                                }
-                            }
-
-                            Spacer()
-
-                            if isSelected {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundStyle(accentColor)
-                                    .transition(.scale.combined(with: .opacity))
-                            }
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(isSelected
-                                      ? accentColor.opacity(0.12)
-                                      : Color.white.opacity(0.03))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .strokeBorder(
-                                            isSelected ? accentColor.opacity(0.4) : Color.white.opacity(0.06),
-                                            lineWidth: 1
-                                        )
-                                )
-                        )
-                        .scaleEffect(isSelected ? 1.01 : 1.0)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!isConfigured)
+                if viewModel.entries.count >= 2 {
+                    Text("\(viewModel.entries.count) models")
+                        .font(.caption)
+                        .foregroundStyle(accentColor.opacity(0.7))
                 }
             }
+
+            // Chips flow + add button
+            FlowLayout(spacing: 8) {
+                // Existing model chips
+                ForEach(viewModel.entries) { entry in
+                    modelChip(entry)
+                        .transition(.scale.combined(with: .opacity))
+                }
+
+                // Add button
+                addModelButton
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: viewModel.entries.count)
         }
+    }
+
+    /// A compact chip showing provider + model with ✕ to remove
+    private func modelChip(_ entry: CompareViewModel.CompareEntry) -> some View {
+        HStack(spacing: 6) {
+            ProviderBadge(providerID: entry.providerID, compact: true)
+
+            Text(shortModelName(entry.modelName))
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1)
+
+            Button {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                    viewModel.removeEntry(entry)
+                }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.4))
+                    .frame(width: 16, height: 16)
+                    .background(Circle().fill(Color.white.opacity(0.08)))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.leading, 6)
+        .padding(.trailing, 6)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(accentColor.opacity(0.1))
+                .overlay(
+                    Capsule().strokeBorder(accentColor.opacity(0.25), lineWidth: 1)
+                )
+        )
+    }
+
+    /// The + button that opens the add model popover
+    private var addModelButton: some View {
+        Button {
+            showingAddModel.toggle()
+            addPickerProvider = nil
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "plus")
+                    .font(.system(size: 11, weight: .bold))
+                Text("Add Model")
+                    .font(.caption.weight(.medium))
+            }
+            .foregroundStyle(accentColor)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(
+                Capsule()
+                    .strokeBorder(accentColor.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+            )
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showingAddModel, arrowEdge: .bottom) {
+            addModelPopover
+        }
+    }
+
+    // MARK: - Add Model Popover
+
+    private var addModelPopover: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                if addPickerProvider != nil {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            addPickerProvider = nil
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Text(addPickerProvider != nil ? "Select Model" : "Select Provider")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            Divider().overlay(Color.white.opacity(0.1))
+
+            ScrollView {
+                VStack(spacing: 2) {
+                    if let pid = addPickerProvider {
+                        // Step 2: Show models for selected provider
+                        let models = viewModel.modelsForProvider(pid)
+                        ForEach(models, id: \.self) { model in
+                            let alreadyAdded = viewModel.entries.contains {
+                                $0.providerID == pid && $0.modelName == model
+                            }
+                            Button {
+                                viewModel.addEntry(providerID: pid, modelName: model)
+                                showingAddModel = false
+                                addPickerProvider = nil
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "cpu")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(accentColor.opacity(0.6))
+                                        .frame(width: 20)
+
+                                    Text(model)
+                                        .font(.callout)
+                                        .foregroundStyle(.white.opacity(alreadyAdded ? 0.3 : 0.9))
+                                        .lineLimit(1)
+
+                                    Spacer()
+
+                                    if alreadyAdded {
+                                        Text("Added")
+                                            .font(.caption2)
+                                            .foregroundStyle(.white.opacity(0.3))
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.white.opacity(0.001)) // Hit area
+                                )
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(alreadyAdded)
+                        }
+                    } else {
+                        // Step 1: Show providers
+                        ForEach(viewModel.configuredProviders, id: \.id) { provider in
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    addPickerProvider = provider.id
+                                }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    ProviderBadge(providerID: provider.id)
+
+                                    Text(provider.displayName)
+                                        .font(.callout.weight(.medium))
+                                        .foregroundStyle(.white.opacity(0.9))
+
+                                    Spacer()
+
+                                    Text("\(viewModel.modelsForProvider(provider.id).count) models")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white.opacity(0.3))
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .foregroundStyle(.white.opacity(0.3))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.white.opacity(0.001))
+                                )
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        // Show unconfigured providers as disabled hints
+                        let unconfigured = AIManager.shared.providers.filter {
+                            !AIManager.shared.isProviderConfigured($0.id)
+                        }
+                        if !unconfigured.isEmpty {
+                            Divider().overlay(Color.white.opacity(0.06)).padding(.vertical, 4)
+
+                            ForEach(unconfigured, id: \.id) { provider in
+                                HStack(spacing: 10) {
+                                    ProviderBadge(providerID: provider.id)
+
+                                    Text(provider.displayName)
+                                        .font(.callout.weight(.medium))
+                                        .foregroundStyle(.white.opacity(0.25))
+
+                                    Spacer()
+
+                                    Text("Not configured")
+                                        .font(.caption2)
+                                        .foregroundStyle(.orange.opacity(0.4))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+        }
+        .frame(width: 300, height: 340)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(red: 0.10, green: 0.10, blue: 0.14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color.white.opacity(0.08))
+                )
+        )
     }
 
     // MARK: - Prompt Input
@@ -228,7 +402,7 @@ struct CompareView: View {
                 } else {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 13))
-                    Text("Compare (\(viewModel.selectedProviderIDs.count) providers)")
+                    Text("Compare (\(viewModel.entries.count) models)")
                         .font(.callout.weight(.semibold))
                 }
             }
@@ -238,19 +412,19 @@ struct CompareView: View {
             .background(
                 RoundedRectangle(cornerRadius: 14)
                     .fill(
-                        viewModel.selectedProviderIDs.count >= 2 && !viewModel.prompt.isEmpty
+                        viewModel.entries.count >= 2 && !viewModel.prompt.isEmpty
                             ? AnyShapeStyle(accentGradient)
                             : AnyShapeStyle(Color.white.opacity(0.08))
                     )
                     .shadow(
-                        color: viewModel.selectedProviderIDs.count >= 2
+                        color: viewModel.entries.count >= 2
                             ? accentColor.opacity(0.3) : .clear,
                         radius: 8, y: 4
                     )
             )
         }
         .buttonStyle(.plain)
-        .disabled(viewModel.selectedProviderIDs.count < 2 || viewModel.prompt.isEmpty || viewModel.isComparing)
+        .disabled(viewModel.entries.count < 2 || viewModel.prompt.isEmpty || viewModel.isComparing)
     }
 
     // MARK: - Result Cards
@@ -269,7 +443,7 @@ struct CompareView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "trophy.fill")
                             .foregroundStyle(.yellow)
-                        Text("Fastest: \(fastest.providerName)")
+                        Text("Fastest: \(fastest.providerName) · \(shortModelName(fastest.modelName))")
                             .foregroundStyle(.white.opacity(0.6))
                     }
                     .font(.caption)
@@ -439,5 +613,73 @@ struct CompareView: View {
             return String(format: "%.0fms", ms)
         }
         return String(format: "%.1fs", ms / 1000)
+    }
+
+    /// Shorten model names for display (e.g. "mistralai/Mistral-7B-Instruct-v0.2" → "Mistral-7B-Instruct-v0.2")
+    private func shortModelName(_ name: String) -> String {
+        if let slashIndex = name.lastIndex(of: "/") {
+            return String(name[name.index(after: slashIndex)...])
+        }
+        return name
+    }
+}
+
+// MARK: - Flow Layout (wrapping horizontal layout)
+
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = arrange(proposal: proposal, subviews: subviews)
+        return result.size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = arrange(proposal: ProposedViewSize(width: bounds.width, height: bounds.height), subviews: subviews)
+        for (index, position) in result.positions.enumerated() {
+            subviews[index].place(
+                at: CGPoint(x: bounds.minX + position.x, y: bounds.minY + position.y),
+                proposal: ProposedViewSize(result.sizes[index])
+            )
+        }
+    }
+
+    private struct ArrangeResult {
+        var size: CGSize
+        var positions: [CGPoint]
+        var sizes: [CGSize]
+    }
+
+    private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> ArrangeResult {
+        let maxWidth = proposal.width ?? .infinity
+        var positions: [CGPoint] = []
+        var sizes: [CGSize] = []
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var totalHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            sizes.append(size)
+
+            if x + size.width > maxWidth && x > 0 {
+                // Wrap to next row
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+
+            positions.append(CGPoint(x: x, y: y))
+            rowHeight = max(rowHeight, size.height)
+            x += size.width + spacing
+            totalHeight = y + rowHeight
+        }
+
+        return ArrangeResult(
+            size: CGSize(width: maxWidth, height: totalHeight),
+            positions: positions,
+            sizes: sizes
+        )
     }
 }

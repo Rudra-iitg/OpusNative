@@ -91,6 +91,14 @@ final class ClipboardMonitor {
             let settings = AIManager.shared.settings
             let response = try await provider.sendMessage(prompt, conversation: [], settings: settings)
             analysisResult = response.content
+
+            // Persist for S3 backup
+            S3BackupManager.saveToolAnalysis(
+                type: "clipboard",
+                title: "Clipboard — \(contentType.rawValue)",
+                content: response.content,
+                toKey: "clipboardAnalysisHistory"
+            )
         } catch {
             errorMessage = error.localizedDescription
         }

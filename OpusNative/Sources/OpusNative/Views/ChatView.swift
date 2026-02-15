@@ -100,7 +100,7 @@ struct ChatView: View {
 
                 RadialGradient(
                     colors: [
-                        Color(red: 0.56, green: 0.44, blue: 1.0).opacity(0.04),
+                        ThemeManager.shared.accent.opacity(0.04),
                         Color.clear
                     ],
                     center: .topTrailing,
@@ -292,12 +292,12 @@ struct ChatView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color(red: 0.56, green: 0.44, blue: 1.0), Color(red: 0.78, green: 0.56, blue: 1.0)],
+                        colors: [ThemeManager.shared.accent, ThemeManager.shared.accentLight],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
-                .shadow(color: Color(red: 0.56, green: 0.44, blue: 1.0).opacity(0.4), radius: 20)
+                .shadow(color: ThemeManager.shared.accent.opacity(0.4), radius: 20)
 
             Text("Start a conversation")
                 .font(.title2.weight(.medium))
@@ -347,11 +347,11 @@ struct ChatView: View {
                     .foregroundStyle(
                         chatVM.currentMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                             ? Color.white.opacity(0.2)
-                            : Color(red: 0.56, green: 0.44, blue: 1.0)
+                            : ThemeManager.shared.accent
                     )
                     .shadow(color: chatVM.currentMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                             ? .clear
-                            : Color(red: 0.56, green: 0.44, blue: 1.0).opacity(0.5),
+                            : ThemeManager.shared.accent.opacity(0.5),
                             radius: 8)
             }
             .buttonStyle(.plain)
@@ -381,14 +381,14 @@ struct StreamingBubbleView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles")
                         .font(.caption)
-                        .foregroundStyle(Color(red: 0.56, green: 0.44, blue: 1.0))
+                        .foregroundStyle(ThemeManager.shared.accent)
                     Text(providerName)
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.white.opacity(0.6))
                     ProgressView()
                         .scaleEffect(0.5)
                         .frame(width: 12, height: 12)
-                        .tint(Color(red: 0.56, green: 0.44, blue: 1.0))
+                        .tint(ThemeManager.shared.accent)
                 }
 
                 Text(text)
