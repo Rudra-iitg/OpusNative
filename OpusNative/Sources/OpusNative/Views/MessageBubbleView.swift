@@ -59,9 +59,23 @@ struct MessageBubbleView: View {
                         .foregroundStyle(.white.opacity(0.2))
 
                     if let tokens = message.tokenCount {
-                        HStack(spacing: 2) {
-                            Image(systemName: "number")
-                            Text("\(tokens) tokens")
+                        HStack(spacing: 6) {
+                            HStack(spacing: 2) {
+                                Image(systemName: "number")
+                                Text("\(tokens)")
+                            }
+                            
+                            // Cost calculation
+                            if let cost = UsageManager.shared.calculateCost(
+                                input: 0, // We don't store input split on message yet, assume mostly output for assistant
+                                output: tokens,
+                                model: message.model ?? ""
+                            ) as Decimal?, cost > 0 {
+                                Text("•")
+                                    .foregroundStyle(.white.opacity(0.2))
+                                Text(cost.formatted(.currency(code: "USD")))
+                                    .foregroundStyle(.green.opacity(0.8))
+                            }
                         }
                         .font(.caption2)
                         .foregroundStyle(.white.opacity(0.25))

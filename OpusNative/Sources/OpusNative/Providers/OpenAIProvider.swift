@@ -59,16 +59,20 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
             throw AIProviderError.invalidResponse(provider: displayName, detail: "Could not parse response")
         }
 
-        var tokenCount: Int?
+        var inputTokens: Int?
+        var outputTokens: Int?
+        
         if let usage = json["usage"] as? [String: Any] {
-            tokenCount = usage["total_tokens"] as? Int
+            inputTokens = usage["prompt_tokens"] as? Int
+            outputTokens = usage["completion_tokens"] as? Int
         }
 
         let finishReason = first["finish_reason"] as? String
 
         return AIResponse(
             content: content,
-            tokenCount: tokenCount,
+            inputTokenCount: inputTokens,
+            outputTokenCount: outputTokens,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
@@ -82,7 +86,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
         _ message: String,
         conversation: [MessageDTO],
         settings: ModelSettings
-    ) async throws -> AsyncThrowingStream<String, Error> {
+    ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let apiKey = try getAPIKey()
 
         let request = try buildRequest(
@@ -117,13 +121,23 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
                             guard let data = jsonStr.data(using: .utf8),
                                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                   let choices = json["choices"] as? [[String: Any]],
-                                  let first = choices.first,
-                                  let delta = first["delta"] as? [String: Any],
-                                  let content = delta["content"] as? String else {
+                                  let first = choices.first else {
                                 continue
                             }
-
-                            continuation.yield(content)
+                            
+                            // Check for content delta
+                            if let delta = first["delta"] as? [String: Any],
+                               let content = delta["content"] as? String {
+                                continuation.yield(.content(content))
+                            }
+                            
+                            // Check for usage (usually in the last chunk with empty choices or specific structure)
+                            // OpenAI stream_options: { include_usage: true } results in a final chunk with usage field
+                            if let usage = json["usage"] as? [String: Any],
+                               let input = usage["prompt_tokens"] as? Int,
+                               let output = usage["completion_tokens"] as? Int {
+                                continuation.yield(.usage(input: input, output: output))
+                            }
                         }
                     }
                     continuation.finish()

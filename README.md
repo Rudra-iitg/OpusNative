@@ -49,6 +49,24 @@ OpusNative is a **native macOS application** built with SwiftUI and SwiftData th
 - AWS SigV4 authentication — no SDK dependency
 - One-click backup and restore of all conversation data
 
+### 📊 Observability & Performance
+- **System Health Dashboard**: Real-time charts for latency, error rates, and token throughput.
+- **Performance Mode**: Auto-throttles UI effects (blur/translucency) based on thermal state.
+- **Structured Logging**: Centralized log/metric collection for debugging.
+
+### 🧠 Advanced Embeddings & Search
+- **Semantic Search**: Find relevant past conversations using vector similarity (cosine).
+- **Vector Store**: In-memory, hardware-accelerated (Accelerate framework) embedding database.
+- **Radar Charts**: Compare models across 4 axes: Speed, Context, Cost, and Intelligence.
+
+### 🔍 Context & Inspector
+- **Prompt Inspector**: View the exact raw prompt sent to the LLM (system + history).
+- **Context Monitor**: Real-time usage bar tracking token limits per model.
+
+### 📈 Reporting
+- **Export Conversations**: Download chats as nicely formatted **Markdown** or raw **JSON**.
+- **Metadata**: Includes timestamps, model used, and cost per message.
+
 ### 🔐 Security First
 - All API keys stored in **macOS Keychain** — never in UserDefaults or plaintext
 - Per-provider credential management
@@ -60,44 +78,27 @@ OpusNative is a **native macOS application** built with SwiftUI and SwiftData th
 
 ```
 OpusNative/Sources/OpusNative/
-├── Core/                    # Protocol layer
-│   ├── AIProvider.swift     # Unified provider protocol + MessageDTO
-│   ├── AIManager.swift      # Provider registry & active provider
-│   ├── AIResponse.swift     # Standardized response type
-│   └── ModelSettings.swift  # Per-provider model configuration
-├── Providers/               # Provider implementations
-│   ├── AnthropicProvider    # Claude — Messages API + SSE streaming
-│   ├── OpenAIProvider       # GPT — Chat Completions + SSE streaming
-│   ├── HuggingFaceProvider  # Inference API (non-streaming)
-│   ├── OllamaProvider       # Local models — NDJSON streaming
-│   └── AWSBedrockProvider   # Bedrock — SigV4 + binary event stream
-├── Features/                # System tools
-│   ├── FileAnalyzer         # NSOpenPanel + AI analysis
-│   ├── ClipboardMonitor     # NSPasteboard polling
-│   ├── CodeAssistant        # Multi-action code analysis
-│   ├── ScreenshotAnalyzer   # ScreenCaptureKit + vision
-│   ├── S3BackupManager      # Encrypted cloud backup
-│   └── PromptTemplateManager
-├── ViewModels/              # MVVM view models
-│   ├── ChatViewModel
-│   ├── CompareViewModel
-│   └── SettingsViewModel
-├── Views/                   # SwiftUI views
-│   ├── ContentView          # Root NavigationSplitView
-│   ├── SidebarView          # Navigation + conversation list
-│   ├── ChatView             # Streaming chat interface
-│   ├── CompareView          # Side-by-side comparison
-│   ├── CodeAssistantView    # Split-pane code editor
-│   ├── ToolsView            # Tabbed system tools
-│   ├── SettingsView         # 5-tab provider settings
-│   └── ToastView            # Notification overlay
-├── Models/                  # SwiftData models
-│   ├── ChatMessage
-│   └── Conversation
-└── Services/                # Low-level services
-    ├── BedrockService       # AWS binary event stream decoder
-    ├── EventStreamDecoder
-    └── KeychainService      # Secure credential storage
+├── Core/                    # Protocol layer (AIProvider, AIResponse)
+├── Managers/                # Application Logic
+│   ├── AIManager.swift      # Provider orchestration
+│   ├── UsageManager.swift   # Token counting & cost tracking
+│   ├── ContextManager.swift # Context window limits
+│   ├── ObservabilityManager # Logs & Metrics
+│   └── PerformanceManager   # Thermal state & UI optimizations
+├── Providers/               # AI Implementations (Anthropic, OpenAI, Ollama, etc.)
+├── Features/                # Functional Modules
+│   ├── Embeddings/          # Vector Store & Search Engines
+│   ├── Reporting/           # Export Logic
+│   ├── ScreenshotAnalyzer
+│   └── S3BackupManager
+├── ViewModels/              # MVVM State Objects
+├── Models/                  # SwiftData Models (ChatMessage, Conversation)
+├── Views/                   # SwiftUI Interface
+│   ├── Chat/                # Main Chat & Input
+│   ├── Comparison/          # Radar Charts & Side-by-Side
+│   ├── Observability/       # Health Dashboard
+│   └── ...
+└── Services/                # Low-level helpers (Keychain, Networking)
 ```
 
 **Design Principles:**

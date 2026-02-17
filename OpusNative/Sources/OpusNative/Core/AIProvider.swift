@@ -10,6 +10,12 @@ struct MessageDTO: Sendable {
     let content: String
 }
 
+/// Chunk of data from a streaming response
+enum AIStreamChunk: Sendable {
+    case content(String)
+    case usage(input: Int, output: Int)
+}
+
 // MARK: - AI Provider Protocol
 
 /// Core protocol that all AI providers must conform to.
@@ -45,7 +51,7 @@ protocol AIProvider: Sendable {
         _ message: String,
         conversation: [MessageDTO],
         settings: ModelSettings
-    ) async throws -> AsyncThrowingStream<String, Error>
+    ) async throws -> AsyncThrowingStream<AIStreamChunk, Error>
 }
 
 // MARK: - Default Streaming Implementation
@@ -56,10 +62,13 @@ extension AIProvider {
         _ message: String,
         conversation: [MessageDTO],
         settings: ModelSettings
-    ) async throws -> AsyncThrowingStream<String, Error> {
+    ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let response = try await sendMessage(message, conversation: conversation, settings: settings)
         return AsyncThrowingStream { continuation in
-            continuation.yield(response.content)
+            continuation.yield(.content(response.content))
+            if let input = response.inputTokenCount, let output = response.outputTokenCount {
+                continuation.yield(.usage(input: input, output: output))
+            }
             continuation.finish()
         }
     }

@@ -7,6 +7,8 @@ struct OpusNativeApp: App {
         let schema = Schema([
             Conversation.self,
             ChatMessage.self,
+            EmbeddingItem.self,
+            EmbeddingCollection.self,
         ])
         let modelConfiguration = ModelConfiguration(
             schema: schema,

@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class ChatMessage: Identifiable {
+final class ChatMessage: Identifiable, Codable {
     @Attribute(.unique) var id: UUID
     var role: String  // "user" or "assistant"
     var content: String
@@ -18,7 +18,10 @@ final class ChatMessage: Identifiable {
     /// Response latency in milliseconds (assistant messages only)
     var latencyMs: Double?
 
-    init(role: String, content: String, conversation: Conversation? = nil, providerID: String? = nil, tokenCount: Int? = nil, latencyMs: Double? = nil) {
+    /// Model used for this message
+    var model: String?
+
+    init(role: String, content: String, conversation: Conversation? = nil, providerID: String? = nil, tokenCount: Int? = nil, latencyMs: Double? = nil, model: String? = nil) {
         self.id = UUID()
         self.role = role
         self.content = content
@@ -27,6 +30,7 @@ final class ChatMessage: Identifiable {
         self.providerID = providerID
         self.tokenCount = tokenCount
         self.latencyMs = latencyMs
+        self.model = model
     }
 
     var isUser: Bool {
@@ -60,6 +64,35 @@ final class ChatMessage: Identifiable {
         }
 
         return blocks
+    }
+    // MARK: - Codable
+    
+    enum CodingKeys: String, CodingKey {
+        case id, role, content, timestamp, providerID, tokenCount, latencyMs, model
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        role = try container.decode(String.self, forKey: .role)
+        content = try container.decode(String.self, forKey: .content)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        providerID = try container.decodeIfPresent(String.self, forKey: .providerID)
+        tokenCount = try container.decodeIfPresent(Int.self, forKey: .tokenCount)
+        latencyMs = try container.decodeIfPresent(Double.self, forKey: .latencyMs)
+        model = try container.decodeIfPresent(String.self, forKey: .model)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(role, forKey: .role)
+        try container.encode(content, forKey: .content)
+        try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(providerID, forKey: .providerID)
+        try container.encode(tokenCount, forKey: .tokenCount)
+        try container.encode(latencyMs, forKey: .latencyMs)
+        try container.encode(model, forKey: .model)
     }
 }
 

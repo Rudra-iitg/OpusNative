@@ -16,6 +16,61 @@ struct CodeAssistantView: View {
                 Text("Code Assistant")
                     .font(.title2.weight(.semibold))
                 Spacer()
+                
+                // Model Selector
+                HStack(spacing: 8) {
+                    // Provider Picker
+                    Menu {
+                        ForEach(AIManager.shared.providers.filter { AIManager.shared.isProviderConfigured($0.id) }, id: \.id) { provider in
+                            Button(provider.displayName) {
+                                assistant.selectedProviderID = provider.id
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            if let provider = AIManager.shared.provider(for: assistant.selectedProviderID) {
+                                ProviderBadge(providerID: provider.id, compact: true)
+                                Text(provider.displayName)
+                            } else {
+                                Text("Select Provider")
+                            }
+                            Image(systemName: "chevron.down")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    
+                    // Model Picker
+                    Menu {
+                         ForEach(assistant.availableModels, id: \.self) { model in
+                            Button(model) {
+                                assistant.selectedModel = model
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                             Text(shortModelName(assistant.selectedModel))
+                                .fixedSize()
+                             Image(systemName: "chevron.down")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .disabled(assistant.availableModels.isEmpty)
+                }
+                .padding(.trailing, 8)
 
                 if assistant.detectedLanguage != "unknown" {
                     HStack(spacing: 6) {
@@ -176,5 +231,14 @@ struct CodeAssistantView: View {
             )
             .ignoresSafeArea()
         )
+    }
+
+    /// Shorten model names (e.g. "mistralai/Mistral-7B" -> "Mistral-7B")
+    private func shortModelName(_ name: String) -> String {
+        if name.isEmpty { return "Select Model" }
+        if let slashIndex = name.lastIndex(of: "/") {
+            return String(name[name.index(after: slashIndex)...])
+        }
+        return name
     }
 }

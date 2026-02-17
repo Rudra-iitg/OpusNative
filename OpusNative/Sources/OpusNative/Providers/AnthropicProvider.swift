@@ -58,18 +58,21 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         }
 
         // Extract token usage
-        var tokenCount: Int?
+        // Extract token usage
+        var inputTokens: Int?
+        var outputTokens: Int?
+        
         if let usage = json["usage"] as? [String: Any] {
-            let input = usage["input_tokens"] as? Int ?? 0
-            let output = usage["output_tokens"] as? Int ?? 0
-            tokenCount = input + output
+            inputTokens = usage["input_tokens"] as? Int
+            outputTokens = usage["output_tokens"] as? Int
         }
 
         let finishReason = (json["stop_reason"] as? String)
 
         return AIResponse(
             content: text,
-            tokenCount: tokenCount,
+            inputTokenCount: inputTokens,
+            outputTokenCount: outputTokens,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
@@ -83,7 +86,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         _ message: String,
         conversation: [MessageDTO],
         settings: ModelSettings
-    ) async throws -> AsyncThrowingStream<String, Error> {
+    ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let apiKey = try getAPIKey()
 
         let request = try buildRequest(
@@ -110,11 +113,13 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    var buffer = ""
+                    var inputTokens = 0
+                    var outputTokens = 0
+                    
                     for try await line in byteStream.lines {
                         if line.hasPrefix("data: ") {
                             let jsonStr = String(line.dropFirst(6))
-                            if jsonStr == "[DONE]" { break }
+                            if jsonStr.trimmingCharacters(in: .whitespaces) == "[DONE]" { break }
 
                             guard let data = jsonStr.data(using: .utf8),
                                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -123,11 +128,25 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
 
                             let type = json["type"] as? String ?? ""
 
+                            if type == "message_start",
+                               let message = json["message"] as? [String: Any],
+                               let usage = message["usage"] as? [String: Any],
+                               let input = usage["input_tokens"] as? Int {
+                                inputTokens = input
+                            }
+                            
+                            if type == "message_delta",
+                               let usage = json["usage"] as? [String: Any],
+                               let output = usage["output_tokens"] as? Int {
+                                outputTokens = output
+                                // message_delta is usually the end of usage updates
+                                continuation.yield(.usage(input: inputTokens, output: outputTokens))
+                            }
+
                             if type == "content_block_delta",
                                let delta = json["delta"] as? [String: Any],
                                let text = delta["text"] as? String {
-                                buffer += text
-                                continuation.yield(text)
+                                continuation.yield(.content(text))
                             }
 
                             if type == "error",

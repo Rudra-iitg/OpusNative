@@ -10,11 +10,23 @@ final class ChatViewModel {
     var isStreaming: Bool = false
     var streamingText: String = ""
     var errorMessage: String?
-    var selectedConversation: Conversation?
+    var selectedConversation: Conversation? {
+        didSet {
+            if let conversation = selectedConversation {
+                ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: AIManager.shared.settings.modelName)
+            }
+        }
+    }
     var lastResponseLatency: Double = 0
     var lastResponseTokens: Int?
 
     private var streamTask: Task<Void, Never>?
+    
+    // Phase 2: Context Monitor
+    var showInspector: Bool = false
+    var contextUsage: Int { ContextManager.shared.currentUsage }
+    var contextLimit: Int { ContextManager.shared.maxContext }
+    var contextPercentage: Double { ContextManager.shared.usagePercentage }
 
     // MARK: - Send Message
 
@@ -50,10 +62,13 @@ final class ChatViewModel {
         guard let conversation = selectedConversation else { return }
 
         // Add user message
-        let userMessage = ChatMessage(role: "user", content: text, conversation: conversation)
+        let userMessage = ChatMessage(role: "user", content: text, conversation: conversation, model: settings.modelName)
         modelContext.insert(userMessage)
         conversation.messages.append(userMessage)
         conversation.updatedAt = Date()
+        
+        // Update context immediately
+        ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
 
         currentMessage = ""
         errorMessage = nil
@@ -65,6 +80,9 @@ final class ChatViewModel {
 
         streamTask = Task {
             do {
+                var inputTokens: Int?
+                var outputTokens: Int?
+
                 if provider.supportsStreaming && settings.useStreaming {
                     // Streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
@@ -74,8 +92,15 @@ final class ChatViewModel {
                         settings: settings
                     )
 
-                    for try await delta in stream {
-                        streamingText += delta
+                    for try await chunk in stream {
+                        switch chunk {
+                        case .content(let text):
+                            streamingText += text
+                        case .usage(let input, let output):
+                            inputTokens = input
+                            outputTokens = output
+                            lastResponseTokens = input + output
+                        }
                     }
                 } else {
                     // Non-streaming mode
@@ -87,10 +112,37 @@ final class ChatViewModel {
                     )
                     streamingText = response.content
                     lastResponseTokens = response.tokenCount
+                    inputTokens = response.inputTokenCount
+                    outputTokens = response.outputTokenCount
+                    
+                    // Track usage
+                    UsageManager.shared.track(response: response)
+                    
+                    // Update context
+                    ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
                 }
 
                 let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
                 lastResponseLatency = latency
+                
+                // Observability: Track latency
+                ObservabilityManager.shared.trackLatency(provider: provider.id, durationMs: latency)
+                ObservabilityManager.shared.log("Response received from \(provider.displayName) in \(Int(latency))ms", level: .info, subsystem: "Chat")
+
+                // Track usage (if not already tracked in non-streaming, but let's just track again or track correctly)
+                // Actually usage is tracked in non-streaming block above.
+                // For streaming, we need to track here.
+                if provider.supportsStreaming && settings.useStreaming {
+                     let response = AIResponse(
+                        content: streamingText,
+                        inputTokenCount: inputTokens,
+                        outputTokenCount: outputTokens,
+                        latencyMs: latency,
+                        model: settings.modelName,
+                        providerID: provider.id
+                    )
+                    UsageManager.shared.track(response: response)
+                }
 
                 // Save completed assistant message
                 let assistantMessage = ChatMessage(
@@ -99,11 +151,15 @@ final class ChatViewModel {
                     conversation: conversation,
                     providerID: provider.id,
                     tokenCount: lastResponseTokens,
-                    latencyMs: latency
+                    latencyMs: latency,
+                    model: settings.modelName
                 )
                 modelContext.insert(assistantMessage)
                 conversation.messages.append(assistantMessage)
                 conversation.updatedAt = Date()
+                
+                // Update context after response
+                ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
 
                 try? modelContext.save()
 
@@ -118,6 +174,10 @@ final class ChatViewModel {
                 let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
                 errorMessage = error.localizedDescription
                 isStreaming = false
+                
+                // Observability: Track error
+                ObservabilityManager.shared.trackError(provider: provider.id)
+                ObservabilityManager.shared.log("Error from \(provider.displayName): \(error.localizedDescription)", level: .error, subsystem: "Chat")
 
                 // Save partial response if any
                 if !streamingText.isEmpty {
@@ -126,7 +186,8 @@ final class ChatViewModel {
                         content: streamingText + "\n\n⚠️ *Stream interrupted*",
                         conversation: conversation,
                         providerID: provider.id,
-                        latencyMs: latency
+                        latencyMs: latency,
+                        model: settings.modelName
                     )
                     modelContext.insert(partialMessage)
                     conversation.messages.append(partialMessage)

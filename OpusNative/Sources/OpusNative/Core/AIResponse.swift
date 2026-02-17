@@ -8,7 +8,15 @@ struct AIResponse: Sendable {
     let content: String
 
     /// Approximate token count (input + output) if available
-    let tokenCount: Int?
+    var tokenCount: Int {
+        return (inputTokenCount ?? 0) + (outputTokenCount ?? 0)
+    }
+    
+    /// Input (Prompt) tokens
+    let inputTokenCount: Int?
+    
+    /// Output (Completion) tokens
+    let outputTokenCount: Int?
 
     /// Response latency in milliseconds
     let latencyMs: Double
@@ -24,14 +32,16 @@ struct AIResponse: Sendable {
 
     init(
         content: String,
-        tokenCount: Int? = nil,
+        inputTokenCount: Int? = nil,
+        outputTokenCount: Int? = nil,
         latencyMs: Double = 0,
         model: String = "",
         providerID: String = "",
         finishReason: String? = nil
     ) {
         self.content = content
-        self.tokenCount = tokenCount
+        self.inputTokenCount = inputTokenCount
+        self.outputTokenCount = outputTokenCount
         self.latencyMs = latencyMs
         self.model = model
         self.providerID = providerID

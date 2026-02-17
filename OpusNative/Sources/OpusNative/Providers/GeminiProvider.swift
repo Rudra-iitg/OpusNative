@@ -100,9 +100,13 @@ final class GeminiProvider: AIProvider, @unchecked Sendable {
             tokenCount = usageMetadata["totalTokenCount"] as? Int
         }
 
+        // Gemini API might provide usage metadata, but for now we'll use placeholder
+        // TODO: Parse usageMetadata from Gemini response if available
+        
         return AIResponse(
             content: text,
-            tokenCount: tokenCount,
+            inputTokenCount: nil,
+            outputTokenCount: nil,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,

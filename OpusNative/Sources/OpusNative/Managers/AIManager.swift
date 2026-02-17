@@ -75,6 +75,7 @@ final class AIManager {
         providerSettings[activeProviderID] = settings
 
         activeProviderID = id
+        ObservabilityManager.shared.log("Switched provider to \(id)", level: .info, subsystem: "AIManager")
 
         // Load saved settings or defaults
         if let saved = providerSettings[id] {

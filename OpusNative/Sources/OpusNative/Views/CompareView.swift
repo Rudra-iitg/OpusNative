@@ -115,7 +115,8 @@ struct CompareView: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        .padding(.bottom, 16)
+        .padding(.top, 40)
     }
 
     // MARK: - Model Selector (Chips + Add Button)

@@ -12,6 +12,21 @@ final class CodeAssistant {
     var result: String = ""
     var errorMessage: String?
     var lastAction: CodeAction?
+    
+    // Model Selection
+    var selectedProviderID: String = "" {
+        didSet {
+            if oldValue != selectedProviderID {
+                updateAvailableModels()
+            }
+        }
+    }
+    var selectedModel: String = ""
+    var availableModels: [String] = []
+
+    init() {
+        initialize()
+    }
 
     enum CodeAction: String, CaseIterable, Identifiable {
         case explain = "Explain Code"
@@ -128,6 +143,43 @@ final class CodeAssistant {
         detectedLanguage = bestMatch
     }
 
+    // MARK: - Initialization & Model Management
+    
+    func initialize() {
+        if let active = AIManager.shared.activeProvider {
+            selectedProviderID = active.id
+        } else if let first = AIManager.shared.providers.first(where: { AIManager.shared.isProviderConfigured($0.id) }) {
+            selectedProviderID = first.id
+        }
+        updateAvailableModels()
+    }
+    
+    func updateAvailableModels() {
+        let aiManager = AIManager.shared
+        
+        // Handle Ollama special case (needs fetch usually, but we rely on what's cached or fetch if empty)
+        if selectedProviderID == "ollama" && aiManager.ollamaModels.isEmpty {
+            Task {
+                await aiManager.fetchOllamaModels()
+                self.availableModels = aiManager.ollamaModels.map(\.name)
+                self.selectDefaultModel()
+            }
+        } else if selectedProviderID == "ollama" {
+             self.availableModels = aiManager.ollamaModels.map(\.name)
+             self.selectDefaultModel()
+        } else {
+            // Standard providers
+            self.availableModels = aiManager.provider(for: selectedProviderID)?.availableModels ?? []
+            self.selectDefaultModel()
+        }
+    }
+    
+    private func selectDefaultModel() {
+        if !availableModels.contains(selectedModel) {
+            selectedModel = availableModels.first ?? ""
+        }
+    }
+
     // MARK: - Execute Action
 
     func execute(action: CodeAction) async {
@@ -136,8 +188,8 @@ final class CodeAssistant {
             return
         }
 
-        guard let provider = AIManager.shared.activeProvider else {
-            errorMessage = "No active provider configured."
+        guard let provider = AIManager.shared.provider(for: selectedProviderID) else {
+            errorMessage = "Selected provider is not configured."
             return
         }
 
@@ -158,9 +210,17 @@ final class CodeAssistant {
         """
 
         do {
-            let settings = AIManager.shared.settings
+            var settings = AIManager.shared.settings
+            // Override model if specific one selected
+            if !selectedModel.isEmpty {
+                settings.modelName = selectedModel
+            }
+            
             let response = try await provider.sendMessage(prompt, conversation: [], settings: settings)
             result = response.content
+            
+            // Track usage
+            UsageManager.shared.track(response: response)
         } catch {
             errorMessage = error.localizedDescription
         }

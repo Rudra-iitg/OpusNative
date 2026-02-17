@@ -64,7 +64,7 @@ final class GrokProvider: AIProvider, @unchecked Sendable {
         ]
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
+        
         let (data, response) = try await session.data(for: request)
         let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
 
@@ -74,33 +74,33 @@ final class GrokProvider: AIProvider, @unchecked Sendable {
 
         try handleHTTPErrors(httpResponse, data: data)
 
-        // Parse OpenAI-compatible response
+        // Parse response
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let choices = json["choices"] as? [[String: Any]],
               let first = choices.first,
-              let msg = first["message"] as? [String: Any],
-              let content = msg["content"] as? String else {
+              let messageObj = first["message"] as? [String: Any],
+              let content = messageObj["content"] as? String else {
             throw AIProviderError.invalidResponse(provider: displayName, detail: "Could not parse response")
         }
-
-        var tokenCount: Int?
+        
+        // Usage
+        var inputTokens: Int?
+        var outputTokens: Int?
         if let usage = json["usage"] as? [String: Any] {
-            tokenCount = usage["total_tokens"] as? Int
+            inputTokens = usage["prompt_tokens"] as? Int
+            outputTokens = usage["completion_tokens"] as? Int
         }
-
-        let finishReason = first["finish_reason"] as? String
 
         return AIResponse(
             content: content,
-            tokenCount: tokenCount,
+            inputTokenCount: inputTokens,
+            outputTokenCount: outputTokens,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
-            finishReason: finishReason
+            finishReason: (first["finish_reason"] as? String)
         )
     }
-
-    // MARK: - Private Helpers
 
     private func getAPIKey() throws -> String {
         guard let key = KeychainService.shared.load(key: KeychainService.grokAPIKey),

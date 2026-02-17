@@ -43,7 +43,7 @@ struct OllamaModelInfo: Codable, Sendable, Identifiable {
 /// Local Ollama provider via localhost API.
 /// Dynamically fetches installed models from /api/tags.
 /// Full streaming support via NDJSON, configurable base URL.
-final class OllamaProvider: AIProvider, @unchecked Sendable {
+final class OllamaProvider: AIProvider, EmbeddingGenerator, @unchecked Sendable {
     let id = "ollama"
     let displayName = "Ollama (Local)"
     let supportsVision = true
@@ -174,19 +174,18 @@ final class OllamaProvider: AIProvider, @unchecked Sendable {
         }
 
         // Ollama provides eval_count (output tokens) and prompt_eval_count (input tokens)
-        var tokenCount: Int?
-        if let evalCount = json["eval_count"] as? Int {
-            let promptCount = json["prompt_eval_count"] as? Int ?? 0
-            tokenCount = promptCount + evalCount
-        }
-
+        // Ollama provides precise usage stats
+        let promptEvalCount = json["prompt_eval_count"] as? Int
+        let evalCount = json["eval_count"] as? Int
+        
         return AIResponse(
             content: content,
-            tokenCount: tokenCount,
+            inputTokenCount: promptEvalCount,
+            outputTokenCount: evalCount,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
-            finishReason: "stop"
+            finishReason: json["done_reason"] as? String
         )
     }
 
@@ -196,47 +195,39 @@ final class OllamaProvider: AIProvider, @unchecked Sendable {
         _ message: String,
         conversation: [MessageDTO],
         settings: ModelSettings
-    ) async throws -> AsyncThrowingStream<String, Error> {
+    ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let request = try buildRequest(
             message: message,
             conversation: conversation,
             settings: settings,
             stream: true
         )
-
+        
         let (byteStream, response) = try await session.bytes(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw AIProviderError.invalidResponse(provider: displayName, detail: "Not an HTTP response")
+        
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw AIProviderError.serverError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? 0, message: "Ollama streaming failed")
         }
-
-        if !(200...299).contains(httpResponse.statusCode) {
-            var errorData = Data()
-            for try await byte in byteStream { errorData.append(byte) }
-            let errorText = String(data: errorData, encoding: .utf8) ?? "Ollama connection failed"
-            throw AIProviderError.serverError(statusCode: httpResponse.statusCode, message: errorText)
-        }
-
+        
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    // Ollama streams NDJSON (one JSON object per line)
                     for try await line in byteStream.lines {
-                        guard !line.isEmpty,
-                              let data = line.data(using: .utf8),
+                        guard let data = line.data(using: .utf8),
                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                             continue
                         }
-
-                        // Check if stream is done
-                        if let done = json["done"] as? Bool, done {
-                            break
-                        }
-
                         // Extract content delta
                         if let message = json["message"] as? [String: Any],
                            let content = message["content"] as? String {
-                            continuation.yield(content)
+                            continuation.yield(.content(content))
+                        }
+                        
+                        if let done = json["done"] as? Bool, done == true {
+                             if let promptEval = json["prompt_eval_count"] as? Int,
+                                let eval = json["eval_count"] as? Int {
+                                 continuation.yield(.usage(input: promptEval, output: eval))
+                             }
                         }
                     }
                     continuation.finish()
@@ -254,6 +245,39 @@ final class OllamaProvider: AIProvider, @unchecked Sendable {
                 }
             }
         }
+    }
+
+    // MARK: - Embedding Generation
+    
+    func generateEmbedding(prompt: String, model: String) async throws -> [Float] {
+        let endpoint = "\(baseURL)/api/embeddings"
+        guard let url = URL(string: endpoint) else {
+            throw AIProviderError.serverError(statusCode: 0, message: "Invalid Ollama URL")
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "model": model,
+            "prompt": prompt
+        ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw AIProviderError.serverError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? 0, message: "Embedding failed")
+        }
+        
+        struct EmbeddingResponse: Decodable {
+            let embedding: [Float]
+        }
+        
+        let result = try JSONDecoder().decode(EmbeddingResponse.self, from: data)
+        return result.embedding
     }
 
     // MARK: - Private Helpers

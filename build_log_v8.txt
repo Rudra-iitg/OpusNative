@@ -1,0 +1,506 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -scheme OpusNative -destination platform=macOS,arch=arm64 build
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  cmark-gfm: https://github.com/swiftlang/swift-cmark @ 0.7.1
+  swift-markdown-ui: https://github.com/gonzalezreal/MarkdownUI @ 2.4.1
+  NetworkImage: https://github.com/gonzalezreal/NetworkImage @ 6.0.1
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (9 targets)
+    Target 'OpusNative' in project 'OpusNative'
+        ➜ Explicit dependency on target 'MarkdownUI' in project 'swift-markdown-ui'
+    Target 'MarkdownUI' in project 'swift-markdown-ui'
+        ➜ Explicit dependency on target 'MarkdownUI' in project 'swift-markdown-ui'
+        ➜ Explicit dependency on target 'cmark-gfm' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'cmark-gfm-extensions' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'NetworkImage' in project 'NetworkImage'
+    Target 'MarkdownUI' in project 'swift-markdown-ui'
+        ➜ Explicit dependency on target 'cmark-gfm' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'cmark-gfm-extensions' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'NetworkImage' in project 'NetworkImage'
+    Target 'NetworkImage' in project 'NetworkImage'
+        ➜ Explicit dependency on target 'NetworkImage' in project 'NetworkImage'
+    Target 'NetworkImage' in project 'NetworkImage' (no dependencies)
+    Target 'cmark-gfm-extensions' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'cmark-gfm-extensions' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'cmark-gfm' in project 'cmark-gfm'
+    Target 'cmark-gfm-extensions' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'cmark-gfm' in project 'cmark-gfm'
+    Target 'cmark-gfm' in project 'cmark-gfm'
+        ➜ Explicit dependency on target 'cmark-gfm' in project 'cmark-gfm'
+    Target 'cmark-gfm' in project 'cmark-gfm' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+ReadFileContents /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/docc/features.json
+
+Build description signature: fb3ecfe7c4a711e51da8e927dc40fd65
+Build description path: /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/XCBuildData/fb3ecfe7c4a711e51da8e927dc40fd65.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk /Users/rudrajha/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -o /Users/rudrajha/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache
+
+SwiftDriver OpusNative normal arm64 com.apple.xcode.tools.swift.compiler (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name OpusNative -Onone -enforce-exclusivity\=checked @/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -target arm64-apple-macos26.2 -g -module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache -output-file-map /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-generated-files.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-own-target-headers.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative-485c25d7b6a3c08dc930c94486a1da5a-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-project-headers.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/SourcePackages/checkouts/swift-cmark/src/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/SourcePackages/checkouts/swift-cmark/extensions/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources-normal/arm64 -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources/arm64 -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-Swift.h -working-directory /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative -experimental-emit-module-separately -disable-cmo
+
+ProcessInfoPlistFile /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Info.plist /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/Info.plist (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-infoPlistUtility /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/PkgInfo -expandbuildsettings -platform macosx -additionalcontentfile /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/assetcatalog_generated_info.plist -o /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Info.plist
+
+SwiftCompile normal arm64 Compiling\ CompareView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/CompareView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/CompareView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ OpusNative (in target 'OpusNative' from project 'OpusNative')
+
+EmitSwiftModule normal arm64 (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 Compiling\ ChatView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ChatView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ChatView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ CodeAssistantView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/CodeAssistantView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/CodeAssistantView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ ContentView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ContentView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ContentView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling ContentView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 Compiling\ OpusNativeApp.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/OpusNativeApp.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/OpusNativeApp.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ SidebarView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/SidebarView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/SidebarView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling SidebarView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling OpusNativeApp.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for OpusNative (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriver\ Compilation\ Requirements OpusNative normal arm64 com.apple.xcode.tools.swift.compiler (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name OpusNative -Onone -enforce-exclusivity\=checked @/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -target arm64-apple-macos26.2 -g -module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache -output-file-map /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-generated-files.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-own-target-headers.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative-485c25d7b6a3c08dc930c94486a1da5a-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-project-headers.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/SourcePackages/checkouts/swift-cmark/src/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/SourcePackages/checkouts/swift-cmark/extensions/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources-normal/arm64 -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources/arm64 -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-Swift.h -working-directory /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative -experimental-emit-module-separately -disable-cmo
+
+Copy /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.swiftmodule/arm64-apple-macos.swiftmodule /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftmodule (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftmodule /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.swiftmodule/arm64-apple-macos.swiftmodule
+
+Copy /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftsourceinfo (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftsourceinfo /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo
+
+Copy /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.swiftmodule/arm64-apple-macos.abi.json /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.abi.json (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.abi.json /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.swiftmodule/arm64-apple-macos.abi.json
+
+SwiftDriverJobDiscovery normal arm64 Compiling CodeAssistantView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ChatView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 Compiling\ GrokProvider.swift,\ HuggingFaceProvider.swift,\ OllamaProvider.swift,\ OpenAIProvider.swift,\ BedrockService.swift,\ ChatViewModel.swift,\ CompareViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/GrokProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/HuggingFaceProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/OllamaProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/OpenAIProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Services/BedrockService.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/ChatViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/GrokProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/HuggingFaceProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/OllamaProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/OpenAIProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Services/BedrockService.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/ChatViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/CompareViewModel.swift:148:50: warning: main actor-isolated property 'tokenCount' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+                            tokenCount: response.tokenCount,
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+
+SwiftCompile normal arm64 Compiling\ MessageBubbleView.swift,\ PersonaView.swift,\ SettingsView.swift,\ ToastView.swift,\ ToolsView.swift,\ WelcomeView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/MessageBubbleView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/PersonaView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/SettingsView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ToastView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ToolsView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/WelcomeView.swift (in target 'OpusNative' from project 'OpusNative')
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/MessageBubbleView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/PersonaView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/SettingsView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ToastView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ToolsView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/WelcomeView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ EmbeddingVisualizationViewModel.swift,\ ComparisonView.swift,\ EmbeddingDashboardView.swift,\ EmbeddingGeneratorView.swift,\ PlaygroundView.swift,\ SemanticSearchView.swift,\ VisualizationView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingVisualizationViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/ComparisonView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/EmbeddingDashboardView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/EmbeddingGeneratorView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/PlaygroundView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/SemanticSearchView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/VisualizationView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingVisualizationViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/ComparisonView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/EmbeddingDashboardView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/EmbeddingGeneratorView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/PlaygroundView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/SemanticSearchView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/SemanticSearchView.swift:39:37: warning: actor-isolated property 'count' can not be referenced from the main actor
+                Text("\(vectorStore.count) documents indexed")
+                                    ^
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Storage/VectorStore.swift:44:9: note: property declared here
+    var count: Int {
+        ^
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Views/VisualizationView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ SettingsViewModel.swift,\ ContextUsageBar.swift,\ RadarChartView.swift,\ ObservabilityDashboardView.swift,\ PromptInspectorView.swift,\ UsageDashboardView.swift,\ ArtifactView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/SettingsViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Chat/ContextUsageBar.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Comparison/RadarChartView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Observability/ObservabilityDashboardView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Tools/PromptInspectorView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Usage/UsageDashboardView.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ArtifactView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/ViewModels/SettingsViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Chat/ContextUsageBar.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Comparison/RadarChartView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Observability/ObservabilityDashboardView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Tools/PromptInspectorView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/Usage/UsageDashboardView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Views/ArtifactView.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ ObservabilityManager.swift,\ PerformanceManager.swift,\ UsageManager.swift,\ ChatMessage.swift,\ AnthropicProvider.swift,\ AWSBedrockProvider.swift,\ GeminiProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/ObservabilityManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/PerformanceManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/UsageManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Models/ChatMessage.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/AnthropicProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/AWSBedrockProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/GeminiProvider.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/ObservabilityManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/PerformanceManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/PerformanceManager.swift:27:17: warning: no 'async' operations occur within 'await' expression
+                await checkThermalState()
+                ^
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/UsageManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Models/ChatMessage.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/AnthropicProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/AWSBedrockProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/AWSBedrockProvider.swift:47:13: warning: variable 'stopReason' was never mutated; consider changing to 'let' constant
+        var stopReason: String? = "stop" // Default to "stop" as per original logic
+        ~~~ ^
+        let
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/GeminiProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+/Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Providers/GeminiProvider.swift:98:13: warning: variable 'tokenCount' was written to, but never read
+        var tokenCount: Int?
+            ^
+
+SwiftCompile normal arm64 Compiling\ AIProvider.swift,\ AIResponse.swift,\ ModelSettings.swift,\ ThemeManager.swift,\ EmbeddingModels.swift,\ DimensionalityReducer.swift,\ EmbeddingAnalyticsEngine.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/AIProvider.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/AIResponse.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/ModelSettings.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/ThemeManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Models/EmbeddingModels.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/DimensionalityReducer.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/EmbeddingAnalyticsEngine.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/AIProvider.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/AIResponse.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/ModelSettings.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Core/ThemeManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Models/EmbeddingModels.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/DimensionalityReducer.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/EmbeddingAnalyticsEngine.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ EmbeddingService.swift,\ EmbeddingStatsEngine.swift,\ KMeansEngine.swift,\ SimilarityEngine.swift,\ EmbeddingComparisonViewModel.swift,\ EmbeddingPlaygroundViewModel.swift,\ EmbeddingViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/EmbeddingService.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/EmbeddingStatsEngine.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/KMeansEngine.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/SimilarityEngine.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingComparisonViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingPlaygroundViewModel.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/EmbeddingService.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/EmbeddingStatsEngine.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/KMeansEngine.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/Services/SimilarityEngine.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingComparisonViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingPlaygroundViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/Embeddings/ViewModels/EmbeddingViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 Compiling\ ClipboardMonitor.swift,\ CodeAssistant.swift,\ FileAnalyzer.swift,\ S3BackupManager.swift,\ ScreenshotAnalyzer.swift,\ AIManager.swift,\ ContextManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/ClipboardMonitor.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/CodeAssistant.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/FileAnalyzer.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/S3BackupManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/ScreenshotAnalyzer.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/AIManager.swift /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/ContextManager.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/ClipboardMonitor.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/CodeAssistant.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/FileAnalyzer.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/S3BackupManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Features/ScreenshotAnalyzer.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/AIManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftCompile normal arm64 /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative/OpusNative/Sources/OpusNative/Managers/ContextManager.swift (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling AIProvider.swift, AIResponse.swift, ModelSettings.swift, ThemeManager.swift, EmbeddingModels.swift, DimensionalityReducer.swift, EmbeddingAnalyticsEngine.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ObservabilityManager.swift, PerformanceManager.swift, UsageManager.swift, ChatMessage.swift, AnthropicProvider.swift, AWSBedrockProvider.swift, GeminiProvider.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling EmbeddingService.swift, EmbeddingStatsEngine.swift, KMeansEngine.swift, SimilarityEngine.swift, EmbeddingComparisonViewModel.swift, EmbeddingPlaygroundViewModel.swift, EmbeddingViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GrokProvider.swift, HuggingFaceProvider.swift, OllamaProvider.swift, OpenAIProvider.swift, BedrockService.swift, ChatViewModel.swift, CompareViewModel.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ClipboardMonitor.swift, CodeAssistant.swift, FileAnalyzer.swift, S3BackupManager.swift, ScreenshotAnalyzer.swift, AIManager.swift, ContextManager.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SettingsViewModel.swift, ContextUsageBar.swift, RadarChartView.swift, ObservabilityDashboardView.swift, PromptInspectorView.swift, UsageDashboardView.swift, ArtifactView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling EmbeddingVisualizationViewModel.swift, ComparisonView.swift, EmbeddingDashboardView.swift, EmbeddingGeneratorView.swift, PlaygroundView.swift, SemanticSearchView.swift, VisualizationView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling CompareView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriverJobDiscovery normal arm64 Compiling MessageBubbleView.swift, PersonaView.swift, SettingsView.swift, ToastView.swift, ToolsView.swift, WelcomeView.swift (in target 'OpusNative' from project 'OpusNative')
+
+SwiftDriver\ Compilation OpusNative normal arm64 com.apple.xcode.tools.swift.compiler (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name OpusNative -Onone -enforce-exclusivity\=checked @/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -target arm64-apple-macos26.2 -g -module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C57-00fa09913b459cbbc988d1f6730289ae.sdkstatcache -output-file-map /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rudrajha/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-generated-files.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-own-target-headers.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative-485c25d7b6a3c08dc930c94486a1da5a-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-project-headers.hmap -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/SourcePackages/checkouts/swift-cmark/src/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/SourcePackages/checkouts/swift-cmark/extensions/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/include -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources-normal/arm64 -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources/arm64 -Xcc -I/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-Swift.h -working-directory /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib normal (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos26.2 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -O0 -L/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -L/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -filelist /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.LinkFileList -install_name @rpath/OpusNative.debug.dylib -Xlinker -rpath -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -Xlinker -rpath -Xlinker @executable_path/../Frameworks -Xlinker -object_path_lto -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.swiftmodule @/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative-linker-args.resp -Wl,-no_warn_duplicate_libraries -Wl,-no_warn_duplicate_libraries -Wl,-no_warn_duplicate_libraries -Wl,-no_warn_duplicate_libraries -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib -Xlinker -add_ast_path -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/swift-markdown-ui.build/Debug/MarkdownUI.build/Objects-normal/arm64/MarkdownUI.swiftmodule @/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/swift-markdown-ui.build/Debug/MarkdownUI.build/Objects-normal/arm64/MarkdownUI-linker-args.resp -Xlinker -add_ast_path -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/NetworkImage.build/Debug/NetworkImage.build/Objects-normal/arm64/NetworkImage.swiftmodule @/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/NetworkImage.build/Debug/NetworkImage.build/Objects-normal/arm64/NetworkImage-linker-args.resp
+
+ConstructStubExecutorLinkFileList /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-ExecutorLinkFileList-normal-arm64.txt (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    construct-stub-executor-link-file-list /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'OpusNative' from project 'OpusNative')
+
+Ld /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative normal (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos26.2 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -O0 -L/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -F/Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/PackageFrameworks -Xlinker -rpath -Xlinker @executable_path/../Frameworks -rdynamic -Xlinker -no_deduplicate -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative-ExecutorLinkFileList-normal-arm64.txt /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative
+
+ExtractAppIntentsMetadata (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name OpusNative --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk --xcode-version 17C52 --platform-family macOS --deployment-target 26.2 --bundle-identifier None.OpusNative --output /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Resources --target-triple arm64-apple-macos26.2 --binary-file /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative --dependency-file /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative_dependency_info.dat --stringsdata-file /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.SwiftFileList --metadata-file-list /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative.DependencyMetadataFileList --static-metadata-file-list /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative.DependencyStaticMetadataFileList --swift-const-vals-list /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/Objects-normal/arm64/OpusNative.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-02-17 15:21:53.148 appintentsmetadataprocessor[5645:115483] Starting appintentsmetadataprocessor export
+2026-02-17 15:21:53.150 appintentsmetadataprocessor[5645:115483] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+CopySwiftLibs /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-swiftStdLibTool --copy --verbose --sign DE7AFC172A5384BC702C3D1306D1F8D8FF2DA20D --scan-executable /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib --scan-folder /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Frameworks --scan-folder /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/PlugIns --scan-folder /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Library/SystemExtensions --scan-folder /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+CodeSign /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+    Signing Identity:     "Apple Development: rudrarajjha2004@gmail.com (R7L8HR4264)"
+    
+    /usr/bin/codesign --force --sign DE7AFC172A5384BC702C3D1306D1F8D8FF2DA20D -o runtime --timestamp\=none --generate-entitlement-der /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/OpusNative.debug.dylib
+
+CodeSign /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/__preview.dylib (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+    Signing Identity:     "Apple Development: rudrarajjha2004@gmail.com (R7L8HR4264)"
+    
+    /usr/bin/codesign --force --sign DE7AFC172A5384BC702C3D1306D1F8D8FF2DA20D -o runtime --timestamp\=none --generate-entitlement-der /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app/Contents/MacOS/__preview.dylib
+
+CodeSign /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    
+    Signing Identity:     "Apple Development: rudrarajjha2004@gmail.com (R7L8HR4264)"
+    
+    /usr/bin/codesign --force --sign DE7AFC172A5384BC702C3D1306D1F8D8FF2DA20D -o runtime --entitlements /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Intermediates.noindex/OpusNative.build/Debug/OpusNative.build/OpusNative.app.xcent --timestamp\=none --generate-entitlement-der /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app
+
+RegisterExecutionPolicyException /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-RegisterExecutionPolicyException /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app
+
+Validate /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    builtin-validationUtility /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app -no-validate-extension -infoplist-subpath Contents/Info.plist
+
+Touch /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    /usr/bin/touch -c /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app
+
+RegisterWithLaunchServices /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app (in target 'OpusNative' from project 'OpusNative')
+    cd /Users/rudrajha/Library/CloudStorage/GoogleDrive-rudrarajjha2004@gmail.com/My\ Drive/Important/Claude/Opus/OpusNative
+    /System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister -f -R -trusted /Users/rudrajha/Library/Developer/Xcode/DerivedData/OpusNative-fdlpiqqyckhfvegoduhankaywskr/Build/Products/Debug/OpusNative.app
+
+** BUILD SUCCEEDED **
+

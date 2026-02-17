@@ -8,6 +8,9 @@ enum NavigationItem: String, CaseIterable, Identifiable {
     case chat = "Chat"
     case compare = "Compare"
     case codeAssistant = "Code Assistant"
+    case embeddings = "Embeddings"
+    case usage = "Usage"
+    case observability = "System Health" // Added case
     case tools = "Tools"
     case settings = "Settings"
 
@@ -18,6 +21,9 @@ enum NavigationItem: String, CaseIterable, Identifiable {
         case .chat: return "bubble.left.and.bubble.right"
         case .compare: return "rectangle.split.2x1"
         case .codeAssistant: return "chevron.left.forwardslash.chevron.right"
+        case .embeddings: return "sparkles.rectangle.stack"
+        case .usage: return "chart.xyaxis.line"
+        case .observability: return "pulse" // Added icon
         case .tools: return "wrench.and.screwdriver"
         case .settings: return "gearshape"
         }
@@ -70,7 +76,13 @@ struct ContentView: View {
             CompareView(viewModel: compareVM)
         case .codeAssistant:
             CodeAssistantView(assistant: codeAssistant)
-        case .tools:
+        case .embeddings:
+            EmbeddingDashboardView()
+                case .usage:
+                    UsageDashboardView()
+                case .observability:
+                    ObservabilityDashboardView() // Added view
+                case .tools:
             ToolsView()
         case .settings:
             SettingsView()

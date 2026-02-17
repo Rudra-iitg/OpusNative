@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 import AppKit
 
 /// Main chat view with multi-provider support, token/latency display, and model settings.
@@ -22,6 +23,13 @@ struct ChatView: View {
         VStack(spacing: 0) {
             // Provider & Model toolbar
             providerToolbar
+            
+            // Phase 2: Context Bar
+            ContextUsageBar(
+                usage: chatVM.contextUsage,
+                limit: chatVM.contextLimit,
+                percentage: chatVM.contextPercentage
+            )
 
             // Messages area
             ScrollViewReader { proxy in
@@ -110,8 +118,35 @@ struct ChatView: View {
             }
             .ignoresSafeArea()
         }
+        .sheet(isPresented: $chatVM.showInspector) {
+            PromptInspectorView(
+                systemPrompt: aiManager.settings.systemPrompt,
+                messages: chatVM.selectedConversation?.sortedMessages ?? [],
+                modelSettings: aiManager.settings
+            )
+        }
         .navigationTitle(chatVM.selectedConversation?.title ?? "OpusNative")
         .toolbar {
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    chatVM.showInspector = true
+                } label: {
+                    Label("Inspect Prompt", systemImage: "doc.text.magnifyingglass")
+                }
+                .help("View full prompt context")
+                
+                Menu {
+                    Button("Export as Markdown") {
+                        exportChat(format: .markdown)
+                    }
+                    Button("Export as JSON") {
+                        exportChat(format: .json)
+                    }
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+            }
+            
             if chatVM.isStreaming {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -258,10 +293,16 @@ struct ChatView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .environment(\.colorScheme, .dark)
-                .overlay(Rectangle().fill(Color.white.opacity(0.02)))
+            Group {
+                if PerformanceManager.shared.reduceTranslucency {
+                    Color.black.opacity(0.9)
+                } else {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .environment(\.colorScheme, .dark)
+                        .overlay(Rectangle().fill(Color.white.opacity(0.02)))
+                }
+            }
         )
         .task {
             // Auto-fetch Ollama models on view appearance when Ollama is active
@@ -361,11 +402,44 @@ struct ChatView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
         .background(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .environment(\.colorScheme, .dark)
-                .overlay(Rectangle().fill(Color.white.opacity(0.03)))
+            Group {
+                if PerformanceManager.shared.reduceTranslucency {
+                    Color(red: 0.1, green: 0.1, blue: 0.12)
+                } else {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .environment(\.colorScheme, .dark)
+                        .overlay(Rectangle().fill(Color.white.opacity(0.03)))
+                }
+            }
         )
+    }
+    private func exportChat(format: ReportFormat) {
+        guard let conversation = chatVM.selectedConversation else { return }
+        
+        let sorted = conversation.sortedMessages
+        let model = AIManager.shared.settings.modelName
+        
+        guard let data = ReportGenerator.shared.generate(conversation: sorted, format: format, model: model) else { return }
+        
+        let ext = format == .markdown ? "md" : "json"
+        let filename = "OpusNative_Chat_\(Date().formatted(date: .numeric, time: .omitted)).\(ext)"
+            .replacingOccurrences(of: "/", with: "-")
+        
+        let savePanel = NSSavePanel()
+        savePanel.allowedContentTypes = format == .markdown ? [UTType.plainText] : [UTType.json]
+        savePanel.nameFieldStringValue = filename
+        savePanel.canCreateDirectories = true
+        savePanel.isExtensionHidden = false
+        savePanel.title = "Export Conversation"
+        savePanel.message = "Choose a location to save your conversation export."
+        
+        savePanel.begin { response in
+            if response == .OK, let url = savePanel.url {
+                try? data.write(to: url)
+                ObservabilityManager.shared.log("Exported chat to \(url.lastPathComponent)", level: .info, subsystem: "Export")
+            }
+        }
     }
 }
 

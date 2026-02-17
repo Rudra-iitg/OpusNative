@@ -81,7 +81,8 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
 
         return AIResponse(
             content: content,
-            tokenCount: nil,
+            inputTokenCount: nil,
+            outputTokenCount: nil,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
@@ -153,3 +154,4 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
         throw AIProviderError.serverError(statusCode: response.statusCode, message: errorText)
     }
 }
+
