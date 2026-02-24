@@ -46,6 +46,13 @@ final class AIManager {
         self.settings = ModelSettings.defaultFor(providerID: savedProvider)
         loadSettings()
         registerDefaultProviders()
+
+        // Defer plugin loading to avoid circular singleton access
+        // (PluginManager.loadPlugins → AIManager.shared.register → deadlock)
+        Task { @MainActor in
+            PluginManager.shared.loadPlugins()
+            PluginManager.shared.startWatching()
+        }
     }
 
     // MARK: - Provider Registration
@@ -115,6 +122,14 @@ final class AIManager {
         case "grok":
             return KeychainService.shared.load(key: KeychainService.grokAPIKey) != nil
         default:
+            // Check if it's a plugin provider
+            if PluginManager.shared.isPluginProvider(providerID) {
+                if let plugin = PluginManager.shared.plugin(for: providerID),
+                   let keyName = plugin.provider?.authKeyName {
+                    return plugin.provider?.authType == "none" || KeychainService.shared.load(key: keyName) != nil
+                }
+                return true
+            }
             return false
         }
     }

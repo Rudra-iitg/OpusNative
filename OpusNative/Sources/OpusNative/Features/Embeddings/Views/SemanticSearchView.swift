@@ -5,6 +5,7 @@ struct SemanticSearchView: View {
     @State private var results: [VectorSearchResult] = []
     @State private var isSearching: Bool = false
     @State private var embeddingModel: String = "nomic-embed-text"
+    @State private var documentCount: Int = 0
     
     // Dependencies (Injected or Singleton)
     private var vectorStore: VectorStore { VectorStore.shared }
@@ -36,7 +37,7 @@ struct SemanticSearchView: View {
             
             // Stats
             HStack {
-                Text("\(vectorStore.count) documents indexed")
+                Text("\(documentCount) documents indexed")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -46,6 +47,9 @@ struct SemanticSearchView: View {
                 }
             }
             .padding(.horizontal)
+            .task {
+                documentCount = await vectorStore.count
+            }
             
             // Results
             ScrollView {

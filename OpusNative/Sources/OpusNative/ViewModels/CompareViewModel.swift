@@ -1,8 +1,10 @@
 import Foundation
+import SwiftData
 
 // MARK: - Compare View Model
 
 /// Sends the same prompt to multiple selected models concurrently and collects results.
+/// Now includes response evaluation: thumbs up/down, rubric scoring, and persistence.
 @Observable
 @MainActor
 final class CompareViewModel {
@@ -11,6 +13,26 @@ final class CompareViewModel {
     var results: [CompareResult] = []
     var isComparing = false
     var errorMessage: String?
+
+    /// SwiftData context for persisting evaluations
+    var modelContext: ModelContext?
+
+    // MARK: - Evaluation State
+
+    /// Thumbs up/down per result ID. `nil` = unrated.
+    var thumbsRatings: [UUID: Bool] = [:]
+
+    /// Rubric scores per result ID → { "Correctness": 4, "Conciseness": 3, ... }
+    var rubricScores: [UUID: [String: Int]] = [:]
+
+    /// Notes per result ID
+    var evaluationNotes: [UUID: String] = [:]
+
+    /// Whether evaluation panel is expanded per result ID
+    var evaluationExpanded: [UUID: Bool] = [:]
+
+    /// Whether evaluations have been saved (for UI feedback)
+    var evaluationsSaved = false
 
     // MARK: - Data Types
 
@@ -81,6 +103,84 @@ final class CompareViewModel {
         Set(entries.map(\.providerID))
     }
 
+    // MARK: - Evaluation Methods
+
+    /// Toggle thumbs up/down for a result
+    func toggleThumbsUp(_ resultID: UUID) {
+        if thumbsRatings[resultID] == true {
+            thumbsRatings[resultID] = nil // Deselect
+        } else {
+            thumbsRatings[resultID] = true
+        }
+        evaluationsSaved = false
+    }
+
+    func toggleThumbsDown(_ resultID: UUID) {
+        if thumbsRatings[resultID] == false {
+            thumbsRatings[resultID] = nil // Deselect
+        } else {
+            thumbsRatings[resultID] = false
+        }
+        evaluationsSaved = false
+    }
+
+    /// Set a rubric score for a result
+    func setRubricScore(_ resultID: UUID, category: String, score: Int) {
+        let clamped = min(max(score, 1), 5)
+        if rubricScores[resultID] == nil {
+            rubricScores[resultID] = [:]
+        }
+        rubricScores[resultID]?[category] = clamped
+        evaluationsSaved = false
+    }
+
+    /// Set notes for a result
+    func setNotes(_ resultID: UUID, notes: String) {
+        evaluationNotes[resultID] = notes
+        evaluationsSaved = false
+    }
+
+    /// Toggle evaluation panel expansion
+    func toggleEvaluation(_ resultID: UUID) {
+        evaluationExpanded[resultID] = !(evaluationExpanded[resultID] ?? false)
+    }
+
+    /// Save all evaluations to SwiftData
+    func saveEvaluations() {
+        guard let modelContext else { return }
+
+        for result in results where result.isSuccess {
+            let hasThumb = thumbsRatings[result.id] != nil
+            let hasScores = !(rubricScores[result.id]?.isEmpty ?? true)
+            let hasNotes = !(evaluationNotes[result.id]?.isEmpty ?? true)
+
+            guard hasThumb || hasScores || hasNotes else { continue }
+
+            let evaluation = ResponseEvaluation(
+                providerID: result.providerID,
+                modelName: result.modelName,
+                prompt: prompt,
+                responseContent: result.content,
+                thumbsUp: thumbsRatings[result.id],
+                scores: rubricScores[result.id] ?? [:],
+                notes: evaluationNotes[result.id]
+            )
+            modelContext.insert(evaluation)
+        }
+
+        try? modelContext.save()
+        evaluationsSaved = true
+    }
+
+    /// Whether any results have evaluation data
+    var hasEvaluationData: Bool {
+        results.contains { result in
+            thumbsRatings[result.id] != nil ||
+            !(rubricScores[result.id]?.isEmpty ?? true) ||
+            !(evaluationNotes[result.id]?.isEmpty ?? true)
+        }
+    }
+
     // MARK: - Compare
 
     /// Send the prompt to all selected models concurrently
@@ -98,6 +198,7 @@ final class CompareViewModel {
 
         isComparing = true
         results = []
+        clearEvaluationState()
         errorMessage = nil
 
         let aiManager = AIManager.shared
@@ -139,13 +240,15 @@ final class CompareViewModel {
                             settings: settings
                         )
                         let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
+                        let responseContent = response.content
+                        let responseTokenCount = response.tokenCount
                         return RawResult(
                             providerID: providerID,
                             providerName: providerName,
                             modelName: modelName,
-                            content: response.content,
+                            content: responseContent,
                             latencyMs: latency,
-                            tokenCount: response.tokenCount,
+                            tokenCount: responseTokenCount,
                             error: nil
                         )
                     } catch {
@@ -190,11 +293,20 @@ final class CompareViewModel {
         prompt = ""
         results = []
         errorMessage = nil
+        clearEvaluationState()
     }
 
     func resetAll() {
         entries = []
         clear()
+    }
+
+    private func clearEvaluationState() {
+        thumbsRatings = [:]
+        rubricScores = [:]
+        evaluationNotes = [:]
+        evaluationExpanded = [:]
+        evaluationsSaved = false
     }
 
     // MARK: - Load Saved Settings
@@ -219,3 +331,4 @@ final class CompareViewModel {
         return ModelSettings.defaultFor(providerID: providerID)
     }
 }
+

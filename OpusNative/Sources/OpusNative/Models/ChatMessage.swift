@@ -9,6 +9,11 @@ final class ChatMessage: Identifiable, Codable {
     var timestamp: Date
     var conversation: Conversation?
 
+    /// Parent message ID for conversation branching.
+    /// `nil` = root message (first in conversation).
+    /// When a user forks at message N, the new branch message gets `parentMessageID = N.id`.
+    var parentMessageID: UUID?
+
     /// Provider that generated this response (nil for user messages)
     var providerID: String?
 
@@ -21,12 +26,13 @@ final class ChatMessage: Identifiable, Codable {
     /// Model used for this message
     var model: String?
 
-    init(role: String, content: String, conversation: Conversation? = nil, providerID: String? = nil, tokenCount: Int? = nil, latencyMs: Double? = nil, model: String? = nil) {
+    init(role: String, content: String, conversation: Conversation? = nil, parentMessageID: UUID? = nil, providerID: String? = nil, tokenCount: Int? = nil, latencyMs: Double? = nil, model: String? = nil) {
         self.id = UUID()
         self.role = role
         self.content = content
         self.timestamp = Date()
         self.conversation = conversation
+        self.parentMessageID = parentMessageID
         self.providerID = providerID
         self.tokenCount = tokenCount
         self.latencyMs = latencyMs
@@ -68,7 +74,7 @@ final class ChatMessage: Identifiable, Codable {
     // MARK: - Codable
     
     enum CodingKeys: String, CodingKey {
-        case id, role, content, timestamp, providerID, tokenCount, latencyMs, model
+        case id, role, content, timestamp, parentMessageID, providerID, tokenCount, latencyMs, model
     }
     
     required init(from decoder: Decoder) throws {
@@ -77,6 +83,7 @@ final class ChatMessage: Identifiable, Codable {
         role = try container.decode(String.self, forKey: .role)
         content = try container.decode(String.self, forKey: .content)
         timestamp = try container.decode(Date.self, forKey: .timestamp)
+        parentMessageID = try container.decodeIfPresent(UUID.self, forKey: .parentMessageID)
         providerID = try container.decodeIfPresent(String.self, forKey: .providerID)
         tokenCount = try container.decodeIfPresent(Int.self, forKey: .tokenCount)
         latencyMs = try container.decodeIfPresent(Double.self, forKey: .latencyMs)
@@ -89,6 +96,7 @@ final class ChatMessage: Identifiable, Codable {
         try container.encode(role, forKey: .role)
         try container.encode(content, forKey: .content)
         try container.encode(timestamp, forKey: .timestamp)
+        try container.encodeIfPresent(parentMessageID, forKey: .parentMessageID)
         try container.encode(providerID, forKey: .providerID)
         try container.encode(tokenCount, forKey: .tokenCount)
         try container.encode(latencyMs, forKey: .latencyMs)

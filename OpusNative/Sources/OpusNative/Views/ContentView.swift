@@ -8,9 +8,10 @@ enum NavigationItem: String, CaseIterable, Identifiable {
     case chat = "Chat"
     case compare = "Compare"
     case codeAssistant = "Code Assistant"
+    case promptLibrary = "Prompts"
     case embeddings = "Embeddings"
     case usage = "Usage"
-    case observability = "System Health" // Added case
+    case observability = "System Health"
     case tools = "Tools"
     case settings = "Settings"
 
@@ -21,9 +22,10 @@ enum NavigationItem: String, CaseIterable, Identifiable {
         case .chat: return "bubble.left.and.bubble.right"
         case .compare: return "rectangle.split.2x1"
         case .codeAssistant: return "chevron.left.forwardslash.chevron.right"
+        case .promptLibrary: return "doc.text.magnifyingglass"
         case .embeddings: return "sparkles.rectangle.stack"
         case .usage: return "chart.xyaxis.line"
-        case .observability: return "pulse" // Added icon
+        case .observability: return "pulse"
         case .tools: return "wrench.and.screwdriver"
         case .settings: return "gearshape"
         }
@@ -39,6 +41,7 @@ struct ContentView: View {
     @State private var selectedNav: NavigationItem? = .chat
     @State private var toastMessage: String?
     @State private var toastType: ToastView.ToastType = .info
+    @State private var showCommandPalette = false
 
     var body: some View {
         NavigationSplitView {
@@ -65,6 +68,37 @@ struct ContentView: View {
         .navigationSplitViewStyle(.balanced)
         .frame(minWidth: 900, minHeight: 600)
         .preferredColorScheme(.dark)
+        .onAppear {
+            compareVM.modelContext = modelContext
+        }
+        // Command Palette overlay (⌘K)
+        .overlay {
+            if showCommandPalette {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture { showCommandPalette = false }
+
+                    VStack {
+                        CommandPalette(isPresented: $showCommandPalette, selectedNav: $selectedNav)
+                            .padding(.top, 80)
+                        Spacer()
+                    }
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                .zIndex(200)
+            }
+        }
+        .background {
+            // Hidden button to register ⌘K keyboard shortcut
+            Button("") {
+                withAnimation { showCommandPalette.toggle() }
+            }
+            .keyboardShortcut("k", modifiers: .command)
+            .opacity(0)
+            .frame(width: 0, height: 0)
+        }
+        .animation(.spring(response: 0.25, dampingFraction: 0.9), value: showCommandPalette)
     }
 
     @ViewBuilder
@@ -76,13 +110,15 @@ struct ContentView: View {
             CompareView(viewModel: compareVM)
         case .codeAssistant:
             CodeAssistantView(assistant: codeAssistant)
+        case .promptLibrary:
+            PromptLibraryView()
         case .embeddings:
             EmbeddingDashboardView()
-                case .usage:
-                    UsageDashboardView()
-                case .observability:
-                    ObservabilityDashboardView() // Added view
-                case .tools:
+        case .usage:
+            UsageDashboardView()
+        case .observability:
+            ObservabilityDashboardView()
+        case .tools:
             ToolsView()
         case .settings:
             SettingsView()

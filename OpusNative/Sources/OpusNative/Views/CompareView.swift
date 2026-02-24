@@ -462,6 +462,27 @@ struct CompareView: View {
                 resultCard(result)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+
+            // Save Evaluations button
+            if viewModel.hasEvaluationData {
+                Button {
+                    viewModel.saveEvaluations()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: viewModel.evaluationsSaved ? "checkmark.circle.fill" : "square.and.arrow.down")
+                        Text(viewModel.evaluationsSaved ? "Evaluations Saved" : "Save All Evaluations")
+                    }
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(viewModel.evaluationsSaved ? Color.green.opacity(0.2) : accentColor.opacity(0.3))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 
@@ -531,6 +552,9 @@ struct CompareView: View {
                     .font(.body)
                     .foregroundStyle(.white.opacity(0.85))
                     .lineSpacing(3)
+
+                // Evaluation controls
+                evaluationControls(result)
             } else {
                 HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -565,6 +589,105 @@ struct CompareView: View {
                 ? Color.yellow.opacity(0.05) : .clear,
             radius: 12, y: 4
         )
+    }
+
+    // MARK: - Evaluation Controls
+
+    private func evaluationControls(_ result: CompareViewModel.CompareResult) -> some View {
+        VStack(spacing: 8) {
+            Divider().overlay(Color.white.opacity(0.06))
+
+            HStack(spacing: 12) {
+                // Thumbs up
+                Button {
+                    viewModel.toggleThumbsUp(result.id)
+                } label: {
+                    Image(systemName: viewModel.thumbsRatings[result.id] == true ? "hand.thumbsup.fill" : "hand.thumbsup")
+                        .foregroundStyle(viewModel.thumbsRatings[result.id] == true ? .green : .white.opacity(0.4))
+                        .font(.callout)
+                }
+                .buttonStyle(.plain)
+
+                // Thumbs down
+                Button {
+                    viewModel.toggleThumbsDown(result.id)
+                } label: {
+                    Image(systemName: viewModel.thumbsRatings[result.id] == false ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                        .foregroundStyle(viewModel.thumbsRatings[result.id] == false ? .red : .white.opacity(0.4))
+                        .font(.callout)
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                // Expand rubric
+                Button {
+                    viewModel.toggleEvaluation(result.id)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                        Text("Rate")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundStyle(accentColor.opacity(0.7))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(accentColor.opacity(0.1)))
+                }
+                .buttonStyle(.plain)
+            }
+
+            // Expanded rubric scoring
+            if viewModel.evaluationExpanded[result.id] == true {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(ResponseEvaluation.rubricCategories, id: \.self) { category in
+                        HStack(spacing: 8) {
+                            Text(category)
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.6))
+                                .frame(width: 100, alignment: .leading)
+
+                            // Star rating 1-5
+                            HStack(spacing: 2) {
+                                ForEach(1...5, id: \.self) { star in
+                                    let currentScore = viewModel.rubricScores[result.id]?[category] ?? 0
+                                    Image(systemName: star <= currentScore ? "star.fill" : "star")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(star <= currentScore ? .yellow : .white.opacity(0.2))
+                                        .onTapGesture {
+                                            viewModel.setRubricScore(result.id, category: category, score: star)
+                                        }
+                                }
+                            }
+                        }
+                    }
+
+                    // Notes
+                    TextField("Add notes...", text: Binding(
+                        get: { viewModel.evaluationNotes[result.id] ?? "" },
+                        set: { viewModel.setNotes(result.id, notes: $0) }
+                    ))
+                    .textFieldStyle(.plain)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.white.opacity(0.04))
+                    )
+                }
+                .padding(10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.03))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.white.opacity(0.06))
+                        )
+                )
+            }
+        }
     }
 
     // MARK: - Rank Badge
