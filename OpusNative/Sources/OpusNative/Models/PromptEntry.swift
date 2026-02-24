@@ -65,11 +65,21 @@ final class PromptEntry {
     // MARK: - Diffing
 
     /// Simple line-by-line diff between two versions.
-    /// Returns an array of diff entries: "+added", "-removed", " unchanged".
+    /// Delegates to `PromptDiffService` for the actual computation.
     func diff(from fromVersion: Int, to toVersion: Int) -> [String] {
         guard let fromText = promptAt(version: fromVersion),
               let toText = promptAt(version: toVersion) else { return [] }
+        return PromptDiffService.diff(from: fromText, to: toText)
+    }
+}
 
+// MARK: - Prompt Diff Service
+
+/// Extracts diff logic from the SwiftData model to keep @Model classes lightweight.
+struct PromptDiffService {
+    /// Simple line-by-line diff between two text strings.
+    /// Returns an array of diff entries: "+added", "-removed", " unchanged".
+    static func diff(from fromText: String, to toText: String) -> [String] {
         let fromLines = fromText.components(separatedBy: "\n")
         let toLines = toText.components(separatedBy: "\n")
 
@@ -97,3 +107,4 @@ final class PromptEntry {
         return result
     }
 }
+

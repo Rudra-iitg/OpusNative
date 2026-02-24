@@ -1,18 +1,39 @@
 import Foundation
+import SwiftData
 import SwiftUI
 
 // MARK: - Prompt Template Manager
 
 /// Manages reusable prompt templates with persistence via UserDefaults.
+/// - Important: This system is deprecated. Use `PromptEntry` (SwiftData) instead.
+///   Call `migrateToSwiftData(modelContext:)` on first launch to migrate existing templates.
+@available(*, deprecated, message: "Use PromptEntry (SwiftData) instead. Call migrateToSwiftData(modelContext:) to migrate.")
 @Observable
 @MainActor
 final class PromptTemplateManager {
     var templates: [PromptTemplate] = []
 
     private let storageKey = "savedPromptTemplates"
+    private static let migrationKey = "promptTemplatesMigratedToSwiftData"
 
     init() {
         loadTemplates()
+    }
+
+    // MARK: - Migration
+
+    /// Migrates all UserDefaults-based templates to SwiftData `PromptEntry` objects.
+    /// Only runs once; subsequent calls are no-ops.
+    func migrateToSwiftData(modelContext: ModelContext) {
+        guard !UserDefaults.standard.bool(forKey: Self.migrationKey) else { return }
+
+        for template in templates {
+            let entry = PromptEntry(name: template.name, prompt: template.prompt, category: template.category)
+            modelContext.insert(entry)
+        }
+        try? modelContext.save()
+
+        UserDefaults.standard.set(true, forKey: Self.migrationKey)
     }
 
     // MARK: - CRUD Operations

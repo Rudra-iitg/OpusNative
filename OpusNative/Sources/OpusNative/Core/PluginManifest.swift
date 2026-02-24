@@ -61,4 +61,8 @@ struct ProviderPluginConfig: Codable, Sendable {
 
     /// Custom request body fields to merge (optional)
     let customBodyFields: [String: String]?
+
+    /// Provider-specific behavioral quirks (e.g., "no-streaming-usage", "non-standard-errors")
+    /// Used by GenericAPIProvider to adapt request/response handling per provider.
+    let quirks: [String]?
 }

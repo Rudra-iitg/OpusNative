@@ -17,11 +17,19 @@ final class ContextManager {
     
     /// Hardcoded limits for major models (safe lower bounds)
     private let modelLimits: [String: Int] = [
-        // Anthropic
+        // Anthropic (current models from AnthropicProvider.availableModels)
+        "claude-sonnet-4-20250514": 200_000,
+        "claude-opus-4-20250514": 200_000,
+        "claude-haiku-3-20250414": 200_000,
+        "claude-3-5-sonnet-20241022": 200_000,
+        "claude-3-haiku-20240307": 200_000,
+        // Legacy Anthropic model IDs (backward compatibility)
         "claude-3-5-sonnet-20240620": 200_000,
         "claude-3-opus-20240229": 200_000,
-        "claude-3-haiku-20240307": 200_000,
         "claude-2.1": 200_000,
+        
+        // AWS Bedrock Anthropic
+        "us.anthropic.claude-sonnet-4-20250514-v1:0": 200_000,
         
         // OpenAI
         "gpt-4o": 128_000,
@@ -29,14 +37,17 @@ final class ContextManager {
         "gpt-4-turbo-preview": 128_000,
         "gpt-3.5-turbo": 16_000,
         
-        // Google
-        "gemini-1.5-pro": 2_000_000, // Actually 1M-2M, huge
+        // Google Gemini
+        "gemini-1.5-pro": 2_000_000,
         "gemini-1.5-flash": 1_000_000,
+        "gemini-2.5-flash-preview-05-20": 1_000_000,
+        
+        // Grok
+        "grok-3": 128_000,
         
         // Local / Other (Conservative defaults)
         "llama3": 8_000,
         "mistral": 32_000,
-        "grog-3": 128_000 // Hypothetical
     ]
     
     private init() {}

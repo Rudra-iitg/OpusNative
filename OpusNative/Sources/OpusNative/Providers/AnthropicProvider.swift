@@ -107,6 +107,13 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
             var errorData = Data()
             for try await byte in byteStream { errorData.append(byte) }
             let errorText = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+
+            if httpResponse.statusCode == 429 {
+                let retryAfter = httpResponse.value(forHTTPHeaderField: "Retry-After")
+                    .flatMap { Int($0) }
+                throw AIProviderError.rateLimited(retryAfter: retryAfter)
+            }
+
             throw AIProviderError.serverError(statusCode: httpResponse.statusCode, message: errorText)
         }
 
@@ -219,13 +226,9 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         let errorText = String(data: data, encoding: .utf8) ?? "Unknown error"
 
         if response.statusCode == 429 {
-            // Try to parse retry-after
-            var retryAfter: Int?
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let headers = json["headers"] as? [String: Any],
-               let retry = headers["retry-after"] as? Int {
-                retryAfter = retry
-            }
+            // Read retry-after from HTTP response headers (not the JSON body)
+            let retryAfter = response.value(forHTTPHeaderField: "Retry-After")
+                .flatMap { Int($0) }
             throw AIProviderError.rateLimited(retryAfter: retryAfter)
         }
 

@@ -86,11 +86,13 @@ final class ChatViewModel {
                 if provider.supportsStreaming && settings.useStreaming {
                     // Streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
-                    let stream = try await provider.streamMessage(
-                        text,
-                        conversation: history,
-                        settings: settings
-                    )
+                    let stream = try await RequestQueue.shared.execute(providerID: provider.id) {
+                        try await provider.streamMessage(
+                            text,
+                            conversation: history,
+                            settings: settings
+                        )
+                    }
 
                     for try await chunk in stream {
                         switch chunk {
@@ -105,11 +107,13 @@ final class ChatViewModel {
                 } else {
                     // Non-streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
-                    let response = try await provider.sendMessage(
-                        text,
-                        conversation: history,
-                        settings: settings
-                    )
+                    let response = try await RequestQueue.shared.execute(providerID: provider.id) {
+                        try await provider.sendMessage(
+                            text,
+                            conversation: history,
+                            settings: settings
+                        )
+                    }
                     streamingText = response.content
                     lastResponseTokens = response.tokenCount
                     inputTokens = response.inputTokenCount

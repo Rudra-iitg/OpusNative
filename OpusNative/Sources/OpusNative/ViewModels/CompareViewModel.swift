@@ -234,11 +234,13 @@ final class CompareViewModel {
                 group.addTask {
                     let startTime = CFAbsoluteTimeGetCurrent()
                     do {
-                        let response = try await provider.sendMessage(
-                            text,
-                            conversation: [],
-                            settings: settings
-                        )
+                        let response = try await RequestQueue.shared.execute(providerID: providerID) {
+                            try await provider.sendMessage(
+                                text,
+                                conversation: [],
+                                settings: settings
+                            )
+                        }
                         let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
                         let responseContent = response.content
                         let responseTokenCount = response.tokenCount
