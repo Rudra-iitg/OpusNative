@@ -8,7 +8,7 @@ enum ReportFormat {
 struct ReportGenerator {
     static let shared = ReportGenerator()
     
-    private init() {}
+    init() {}
     
     func generate(conversation: [ChatMessage], format: ReportFormat, model: String) -> Data? {
         switch format {

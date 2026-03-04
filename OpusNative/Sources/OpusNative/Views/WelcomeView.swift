@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @Environment(AppDIContainer.self) private var diContainer
+    private var themeManager: ThemeManager { diContainer.themeManager }
     @State private var isVisible = false
     
     var body: some View {
@@ -9,12 +11,12 @@ struct WelcomeView: View {
                 .font(.system(size: 64))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [ThemeManager.shared.accent, ThemeManager.shared.accentLight],
+                        colors: [themeManager.accent, themeManager.accentLight],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
-                .shadow(color: ThemeManager.shared.accent.opacity(0.4), radius: 20)
+                .shadow(color: themeManager.accent.opacity(0.4), radius: 20)
                 .scaleEffect(isVisible ? 1.0 : 0.8)
                 .opacity(isVisible ? 1.0 : 0.0)
             

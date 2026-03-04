@@ -50,7 +50,7 @@ final class ContextManager {
         "mistral": 32_000,
     ]
     
-    private init() {}
+    init() {}
     
     // MARK: - Public API
     

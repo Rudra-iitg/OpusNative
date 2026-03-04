@@ -20,8 +20,14 @@ final class GeminiProvider: AIProvider, @unchecked Sendable {
         "gemini-1.5-flash"
     ]
 
-    private let baseURL = "https://generativelanguage.googleapis.com/v1beta"
+    private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models"
     private let session = URLSession.shared
+    
+    private let keychain: KeychainService
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
 
     // MARK: - Send Message
 
@@ -117,7 +123,7 @@ final class GeminiProvider: AIProvider, @unchecked Sendable {
     // MARK: - Private Helpers
 
     private func getAPIKey() throws -> String {
-        guard let key = KeychainService.shared.load(key: KeychainService.geminiAPIKey),
+        guard let key = keychain.load(key: KeychainService.geminiAPIKey),
               !key.isEmpty else {
             throw AIProviderError.missingAPIKey(provider: displayName)
         }

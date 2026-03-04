@@ -24,7 +24,10 @@ final class CodeAssistant {
     var selectedModel: String = ""
     var availableModels: [String] = []
 
-    init() {
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
         initialize()
     }
 
@@ -146,16 +149,16 @@ final class CodeAssistant {
     // MARK: - Initialization & Model Management
     
     func initialize() {
-        if let active = AIManager.shared.activeProvider {
+        if let active = diContainer.aiManager.activeProvider {
             selectedProviderID = active.id
-        } else if let first = AIManager.shared.providers.first(where: { AIManager.shared.isProviderConfigured($0.id) }) {
+        } else if let first = diContainer.aiManager.providers.first(where: { diContainer.aiManager.isProviderConfigured($0.id) }) {
             selectedProviderID = first.id
         }
         updateAvailableModels()
     }
     
     func updateAvailableModels() {
-        let aiManager = AIManager.shared
+        let aiManager = diContainer.aiManager
         
         // Handle Ollama special case (needs fetch usually, but we rely on what's cached or fetch if empty)
         if selectedProviderID == "ollama" && aiManager.ollamaModels.isEmpty {
@@ -188,7 +191,7 @@ final class CodeAssistant {
             return
         }
 
-        guard let provider = AIManager.shared.provider(for: selectedProviderID) else {
+        guard let provider = diContainer.aiManager.provider(for: selectedProviderID) else {
             errorMessage = "Selected provider is not configured."
             return
         }
@@ -210,7 +213,7 @@ final class CodeAssistant {
         """
 
         do {
-            var settings = AIManager.shared.settings
+            var settings = diContainer.aiManager.settings
             // Override model if specific one selected
             if !selectedModel.isEmpty {
                 settings.modelName = selectedModel
@@ -220,7 +223,7 @@ final class CodeAssistant {
             result = response.content
             
             // Track usage
-            UsageManager.shared.track(response: response)
+            diContainer.usageManager.track(response: response)
         } catch {
             errorMessage = error.localizedDescription
         }

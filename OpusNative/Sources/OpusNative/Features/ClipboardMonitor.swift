@@ -12,6 +12,11 @@ final class ClipboardMonitor {
     var analysisResult: String = ""
     var contentType: ClipboardContentType = .empty
     var errorMessage: String?
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+    }
 
     enum ClipboardContentType: String {
         case text = "Text"
@@ -50,7 +55,7 @@ final class ClipboardMonitor {
             return
         }
 
-        guard let provider = AIManager.shared.activeProvider else {
+        guard let provider = diContainer.aiManager.activeProvider else {
             errorMessage = "No active provider configured."
             return
         }
@@ -88,14 +93,14 @@ final class ClipboardMonitor {
         }
 
         do {
-            let settings = AIManager.shared.settings
+            let settings = diContainer.aiManager.settings
             let response = try await provider.sendMessage(prompt, conversation: [], settings: settings)
             analysisResult = response.content
 
             // Persist for S3 backup
-            S3BackupManager.saveToolAnalysis(
+            diContainer.s3BackupManager.saveToolAnalysis(
                 type: "clipboard",
-                title: "Clipboard — \(contentType.rawValue)",
+                title: contentType.rawValue,
                 content: response.content,
                 toKey: "clipboardAnalysisHistory"
             )

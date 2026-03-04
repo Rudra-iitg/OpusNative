@@ -44,6 +44,12 @@ final class SettingsViewModel {
     // SwiftData context (set from view)
     var modelContext: ModelContext?
 
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+    }
+
     static let regions = [
         // US
         "us-east-1",       // N. Virginia
@@ -80,29 +86,29 @@ final class SettingsViewModel {
 
     func loadSettings() {
         // Provider keys
-        anthropicKey = KeychainService.shared.load(key: KeychainService.anthropicAPIKey) ?? ""
-        openaiKey = KeychainService.shared.load(key: KeychainService.openaiAPIKey) ?? ""
-        huggingfaceToken = KeychainService.shared.load(key: KeychainService.huggingfaceToken) ?? ""
-        geminiKey = KeychainService.shared.load(key: KeychainService.geminiAPIKey) ?? ""
-        grokKey = KeychainService.shared.load(key: KeychainService.grokAPIKey) ?? ""
-        ollamaBaseURL = KeychainService.shared.load(key: KeychainService.ollamaBaseURL) ?? "http://localhost:11434"
+        anthropicKey = diContainer.keychainService.load(key: KeychainService.anthropicAPIKey) ?? ""
+        openaiKey = diContainer.keychainService.load(key: KeychainService.openaiAPIKey) ?? ""
+        huggingfaceToken = diContainer.keychainService.load(key: KeychainService.huggingfaceToken) ?? ""
+        geminiKey = diContainer.keychainService.load(key: KeychainService.geminiAPIKey) ?? ""
+        grokKey = diContainer.keychainService.load(key: KeychainService.grokAPIKey) ?? ""
+        ollamaBaseURL = diContainer.keychainService.load(key: KeychainService.ollamaBaseURL) ?? "http://localhost:11434"
 
         // Bedrock
-        accessKey = KeychainService.shared.load(key: KeychainService.accessKeyID) ?? ""
-        secretKey = KeychainService.shared.load(key: KeychainService.secretAccessKey) ?? ""
+        accessKey = diContainer.keychainService.load(key: KeychainService.accessKeyID) ?? ""
+        secretKey = diContainer.keychainService.load(key: KeychainService.secretAccessKey) ?? ""
         region = UserDefaults.standard.string(forKey: "awsRegion") ?? "us-east-1"
         modelId = UserDefaults.standard.string(forKey: "modelId") ?? "us.anthropic.claude-sonnet-4-20250514-v1:0"
 
         // S3
-        s3AccessKey = KeychainService.shared.load(key: KeychainService.s3AccessKey) ?? ""
-        s3SecretKey = KeychainService.shared.load(key: KeychainService.s3SecretKey) ?? ""
-        s3BucketName = KeychainService.shared.load(key: KeychainService.s3BucketName) ?? ""
-        s3Region = KeychainService.shared.load(key: KeychainService.s3Region) ?? "us-east-1"
+        s3AccessKey = diContainer.keychainService.load(key: KeychainService.s3AccessKey) ?? ""
+        s3SecretKey = diContainer.keychainService.load(key: KeychainService.s3SecretKey) ?? ""
+        s3BucketName = diContainer.keychainService.load(key: KeychainService.s3BucketName) ?? ""
+        s3Region = diContainer.keychainService.load(key: KeychainService.s3Region) ?? "us-east-1"
 
         // Model Settings
-        temperature = AIManager.shared.settings.temperature
-        maxTokens = AIManager.shared.settings.maxTokens
-        topP = AIManager.shared.settings.topP
+        temperature = diContainer.aiManager.settings.temperature
+        maxTokens = diContainer.aiManager.settings.maxTokens
+        topP = diContainer.aiManager.settings.topP
 
         // Persona
         systemPrompt = UserDefaults.standard.string(forKey: "systemPrompt") ?? ""
@@ -118,44 +124,44 @@ final class SettingsViewModel {
         var allSaved = true
 
         if !anthropicKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.anthropicAPIKey, value: anthropicKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.anthropicAPIKey, value: anthropicKey) && allSaved
         }
         if !openaiKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.openaiAPIKey, value: openaiKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.openaiAPIKey, value: openaiKey) && allSaved
         }
         if !huggingfaceToken.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.huggingfaceToken, value: huggingfaceToken) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.huggingfaceToken, value: huggingfaceToken) && allSaved
         }
         if !geminiKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.geminiAPIKey, value: geminiKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.geminiAPIKey, value: geminiKey) && allSaved
         }
         if !grokKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.grokAPIKey, value: grokKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.grokAPIKey, value: grokKey) && allSaved
         }
         if !ollamaBaseURL.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.ollamaBaseURL, value: ollamaBaseURL) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.ollamaBaseURL, value: ollamaBaseURL) && allSaved
         }
 
         // Bedrock
         if !accessKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.accessKeyID, value: accessKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.accessKeyID, value: accessKey) && allSaved
         }
         if !secretKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.secretAccessKey, value: secretKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.secretAccessKey, value: secretKey) && allSaved
         }
 
         // S3
         if !s3AccessKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.s3AccessKey, value: s3AccessKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.s3AccessKey, value: s3AccessKey) && allSaved
         }
         if !s3SecretKey.isEmpty {
-            allSaved = KeychainService.shared.save(key: KeychainService.s3SecretKey, value: s3SecretKey) && allSaved
+            allSaved = diContainer.keychainService.save(key: KeychainService.s3SecretKey, value: s3SecretKey) && allSaved
         }
         if !s3BucketName.isEmpty {
-            KeychainService.shared.save(key: KeychainService.s3BucketName, value: s3BucketName)
+            diContainer.keychainService.save(key: KeychainService.s3BucketName, value: s3BucketName)
         }
         if !s3Region.isEmpty {
-            KeychainService.shared.save(key: KeychainService.s3Region, value: s3Region)
+            diContainer.keychainService.save(key: KeychainService.s3Region, value: s3Region)
         }
 
         // UserDefaults
@@ -166,12 +172,12 @@ final class SettingsViewModel {
         UserDefaults.standard.set(backgroundOpacity, forKey: "backgroundOpacity")
 
         // Update AIManager settings
-        var settings = AIManager.shared.settings
+        var settings = diContainer.aiManager.settings
         settings.temperature = temperature
         settings.maxTokens = maxTokens
         settings.topP = topP
         settings.systemPrompt = systemPrompt
-        AIManager.shared.settings = settings
+        diContainer.aiManager.settings = settings
 
         if allSaved {
             saveStatus = "✓ Settings saved securely"

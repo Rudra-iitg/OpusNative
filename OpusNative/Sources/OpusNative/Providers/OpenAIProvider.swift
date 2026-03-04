@@ -23,6 +23,12 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
 
     private let baseURL = "https://api.openai.com/v1/chat/completions"
     private let session = URLSession.shared
+    
+    private let keychain: KeychainService
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
 
     // MARK: - Send Message (Non-Streaming)
 
@@ -151,7 +157,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
     // MARK: - Private Helpers
 
     private func getAPIKey() throws -> String {
-        guard let key = KeychainService.shared.load(key: KeychainService.openaiAPIKey),
+        guard let key = keychain.load(key: KeychainService.openaiAPIKey),
               !key.isEmpty else {
             throw AIProviderError.missingAPIKey(provider: displayName)
         }

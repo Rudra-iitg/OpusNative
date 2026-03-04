@@ -10,8 +10,11 @@ struct CommandPalette: View {
 
     @State private var searchText = ""
     @State private var selectedIndex = 0
+    @Environment(AppDIContainer.self) private var diContainer
 
-    private var accentColor: Color { ThemeManager.shared.accent }
+    private var themeManager: ThemeManager { diContainer.themeManager }
+    private var aiManager: AIManager { diContainer.aiManager }
+    private var accentColor: Color { themeManager.accent }
 
     // MARK: - Action Registry
 
@@ -39,14 +42,15 @@ struct CommandPalette: View {
         }
 
         // Provider switching
-        for provider in AIManager.shared.configuredProviders {
+        let localAIManager = aiManager // Capture for closure to avoid self usage error
+        for provider in localAIManager.configuredProviders {
             actions.append(PaletteAction(
                 title: "Switch to \(provider.displayName)",
                 subtitle: "Change active AI provider",
                 icon: "arrow.triangle.swap",
                 shortcut: nil,
                 action: {
-                    AIManager.shared.switchProvider(to: provider.id)
+                    localAIManager.switchProvider(to: provider.id)
                     isPresented = false
                 }
             ))

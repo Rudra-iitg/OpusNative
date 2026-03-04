@@ -73,7 +73,10 @@ final class S3BackupManager {
     var isListingBackups = false
     var progress: Double = 0.0
     var statusMessage: String = ""
+    /// Errors during last backup/restore
     var errorMessage: String?
+    
+    var aiManager: AIManager!
     var availableBackups: [BackupDateInfo] = []
     var lastBackupDate: Date?
 
@@ -106,7 +109,7 @@ final class S3BackupManager {
         return f
     }()
 
-    private init() {
+    init() {
         // Load last backup date
         if let ts = UserDefaults.standard.object(forKey: "lastBackupTimestamp") as? Date {
             lastBackupDate = ts
@@ -396,14 +399,14 @@ final class S3BackupManager {
     }
 
     /// Save a tool analysis entry (called by ClipboardMonitor, FileAnalyzer, ScreenshotAnalyzer)
-    static func saveToolAnalysis(type: String, title: String, content: String, toKey key: String) {
+    func saveToolAnalysis(type: String, title: String, content: String, toKey key: String) {
         let entry = ToolAnalysisEntry(
             id: UUID().uuidString,
             type: type,
             title: title,
             content: content,
-            providerID: AIManager.shared.activeProvider?.id ?? "unknown",
-            modelName: AIManager.shared.settings.modelName,
+            providerID: aiManager.activeProvider?.id ?? "unknown",
+            modelName: aiManager.settings.modelName,
             timestamp: Date()
         )
 

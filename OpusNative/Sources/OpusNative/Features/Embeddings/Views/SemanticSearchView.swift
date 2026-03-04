@@ -7,9 +7,10 @@ struct SemanticSearchView: View {
     @State private var embeddingModel: String = "nomic-embed-text"
     @State private var documentCount: Int = 0
     
+    @Environment(AppDIContainer.self) private var diContainer
     // Dependencies (Injected or Singleton)
-    private var vectorStore: VectorStore { VectorStore.shared }
-    private var embeddingService: EmbeddingGenerator { AIManager.shared.provider(for: "ollama") as? EmbeddingGenerator ?? OllamaProvider() }
+    private var vectorStore: VectorStore { diContainer.vectorStore }
+    private var embeddingService: EmbeddingGenerator { diContainer.aiManager.provider(for: "ollama") as? EmbeddingGenerator ?? OllamaProvider(keychain: diContainer.keychainService) }
     
     var body: some View {
         VStack(spacing: 20) {

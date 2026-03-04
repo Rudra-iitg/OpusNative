@@ -22,6 +22,11 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
     private let baseURL = "https://api.anthropic.com/v1/messages"
     private let apiVersion = "2023-06-01"
     private let session = URLSession.shared
+    private let keychain: KeychainService
+
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
 
     // MARK: - Send Message (Non-Streaming)
 
@@ -175,7 +180,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
     // MARK: - Private Helpers
 
     private func getAPIKey() throws -> String {
-        guard let key = KeychainService.shared.load(key: KeychainService.anthropicAPIKey),
+        guard let key = keychain.load(key: KeychainService.anthropicAPIKey),
               !key.isEmpty else {
             throw AIProviderError.missingAPIKey(provider: displayName)
         }

@@ -9,8 +9,11 @@ struct MessageBubbleView: View {
     @State private var selectedCodeBlock: CodeBlock?
     @State private var isHovered: Bool = false
     @State private var showCopied: Bool = false
+    @Environment(AppDIContainer.self) private var diContainer
 
-    private var accentColor: Color { ThemeManager.shared.accent }
+    private var themeManager: ThemeManager { diContainer.themeManager }
+    private var usageManager: UsageManager { diContainer.usageManager }
+    private var accentColor: Color { themeManager.accent }
 
     var body: some View {
         HStack(alignment: .top) {
@@ -66,7 +69,7 @@ struct MessageBubbleView: View {
                             }
                             
                             // Cost calculation
-                            if let cost = UsageManager.shared.calculateCost(
+                            if let cost = usageManager.calculateCost(
                                 input: 0, // We don't store input split on message yet, assume mostly output for assistant
                                 output: tokens,
                                 model: message.model ?? ""

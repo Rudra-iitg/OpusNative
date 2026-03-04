@@ -20,7 +20,10 @@ struct PromptLibraryView: View {
     @State private var editPromptText = ""
     @State private var editCategory = "General"
 
-    private var accentColor: Color { ThemeManager.shared.accent }
+    @Environment(AppDIContainer.self) private var diContainer
+    private var themeManager: ThemeManager { diContainer.themeManager }
+
+    private var accentColor: Color { themeManager.accent }
 
     private var filteredPrompts: [PromptEntry] {
         var result = prompts

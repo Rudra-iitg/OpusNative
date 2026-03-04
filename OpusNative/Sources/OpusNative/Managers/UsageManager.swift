@@ -43,7 +43,7 @@ final class UsageManager {
     private let lifetimeKey = "usage_lifetime"
     private let monthlyKey = "usage_monthly"
     
-    private init() {
+    init() {
         loadData()
     }
     

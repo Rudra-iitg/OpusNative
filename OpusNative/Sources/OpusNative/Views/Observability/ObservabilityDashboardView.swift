@@ -2,8 +2,9 @@ import SwiftUI
 import Charts
 
 struct ObservabilityDashboardView: View {
-    @State private var observability = ObservabilityManager.shared
-    @State private var performance = PerformanceManager.shared
+    @Environment(AppDIContainer.self) private var diContainer
+    private var observability: ObservabilityManager { diContainer.observabilityManager }
+    private var performance: PerformanceManager { diContainer.performanceManager }
     
     @State private var selectedLevel: LogLevel?
     @State private var searchText = ""

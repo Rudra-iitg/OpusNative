@@ -31,7 +31,7 @@ final class EmbeddingViewModel {
     var comparisonResult: Double? // Cosine Similarity
     
     // MARK: - Dependencies
-    private let service = EmbeddingService.shared
+    private let service = EmbeddingService()
     private var modelContext: ModelContext?
     
     // MARK: - Initialization

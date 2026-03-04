@@ -5,7 +5,11 @@ import MarkdownUI
 struct CodeAssistantView: View {
     @Bindable var assistant: CodeAssistant
 
-    private var accentColor: Color { ThemeManager.shared.accent }
+    @Environment(AppDIContainer.self) private var diContainer
+    
+    private var themeManager: ThemeManager { diContainer.themeManager }
+    private var aiManager: AIManager { diContainer.aiManager }
+    private var accentColor: Color { themeManager.accent }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -21,14 +25,14 @@ struct CodeAssistantView: View {
                 HStack(spacing: 8) {
                     // Provider Picker
                     Menu {
-                        ForEach(AIManager.shared.providers.filter { AIManager.shared.isProviderConfigured($0.id) }, id: \.id) { provider in
+                        ForEach(aiManager.providers.filter { aiManager.isProviderConfigured($0.id) }, id: \.id) { provider in
                             Button(provider.displayName) {
                                 assistant.selectedProviderID = provider.id
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            if let provider = AIManager.shared.provider(for: assistant.selectedProviderID) {
+                            if let provider = aiManager.provider(for: assistant.selectedProviderID) {
                                 ProviderBadge(providerID: provider.id, compact: true)
                                 Text(provider.displayName)
                             } else {

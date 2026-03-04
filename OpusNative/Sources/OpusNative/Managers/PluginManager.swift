@@ -14,6 +14,9 @@ final class PluginManager {
 
     /// Errors encountered during plugin loading
     private(set) var loadErrors: [String: String] = [:]
+    var diContainer: AppDIContainer!
+    
+    init() {}
 
     /// Whether plugins are currently being loaded
     var isLoading = false
@@ -26,8 +29,6 @@ final class PluginManager {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         return appSupport.appendingPathComponent("OpusNative/plugins", isDirectory: true)
     }()
-
-    private init() {}
 
     // MARK: - Loading
 
@@ -86,7 +87,7 @@ final class PluginManager {
 
     /// Register all plugin providers with AIManager
     private func registerProviders() {
-        let aiManager = AIManager.shared
+        let aiManager = diContainer.aiManager
 
         for plugin in plugins {
             guard let config = plugin.provider else { continue }
@@ -97,7 +98,8 @@ final class PluginManager {
             let provider = GenericAPIProvider(
                 pluginID: plugin.id,
                 pluginName: plugin.name,
-                config: config
+                config: config,
+                keychain: diContainer.keychainService
             )
             aiManager.register(provider: provider)
         }

@@ -36,7 +36,7 @@ final class ThemeManager {
         Self.themes[currentThemeIndex].name
     }
 
-    private init() {
+    init() {
         let saved = UserDefaults.standard.integer(forKey: "selectedThemeIndex")
         self.currentThemeIndex = (saved >= 0 && saved < Self.themes.count) ? saved : 0
     }

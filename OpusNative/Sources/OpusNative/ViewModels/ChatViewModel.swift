@@ -6,6 +6,12 @@ import SwiftData
 @Observable
 @MainActor
 final class ChatViewModel {
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+    }
+    
     var currentMessage: String = ""
     var isStreaming: Bool = false
     var streamingText: String = ""
@@ -13,7 +19,7 @@ final class ChatViewModel {
     var selectedConversation: Conversation? {
         didSet {
             if let conversation = selectedConversation {
-                ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: AIManager.shared.settings.modelName)
+                diContainer.contextManager.updateUsage(messages: conversation.sortedMessages, model: diContainer.aiManager.settings.modelName)
             }
         }
     }
@@ -24,9 +30,9 @@ final class ChatViewModel {
     
     // Phase 2: Context Monitor
     var showInspector: Bool = false
-    var contextUsage: Int { ContextManager.shared.currentUsage }
-    var contextLimit: Int { ContextManager.shared.maxContext }
-    var contextPercentage: Double { ContextManager.shared.usagePercentage }
+    var contextUsage: Int { diContainer.contextManager.currentUsage }
+    var contextLimit: Int { diContainer.contextManager.maxContext }
+    var contextPercentage: Double { diContainer.contextManager.usagePercentage }
 
     // MARK: - Send Message
 
@@ -34,7 +40,7 @@ final class ChatViewModel {
         let text = currentMessage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isStreaming else { return }
 
-        let aiManager = AIManager.shared
+        let aiManager = diContainer.aiManager
 
         guard let provider = aiManager.activeProvider else {
             errorMessage = "No provider selected. Configure a provider in Settings."
@@ -68,7 +74,7 @@ final class ChatViewModel {
         conversation.updatedAt = Date()
         
         // Update context immediately
-        ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
+        diContainer.contextManager.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
 
         currentMessage = ""
         errorMessage = nil
@@ -86,7 +92,7 @@ final class ChatViewModel {
                 if provider.supportsStreaming && settings.useStreaming {
                     // Streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
-                    let stream = try await RequestQueue.shared.execute(providerID: provider.id) {
+                    let stream = try await diContainer.requestQueue.execute(providerID: provider.id) {
                         try await provider.streamMessage(
                             text,
                             conversation: history,
@@ -107,7 +113,7 @@ final class ChatViewModel {
                 } else {
                     // Non-streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
-                    let response = try await RequestQueue.shared.execute(providerID: provider.id) {
+                    let response = try await diContainer.requestQueue.execute(providerID: provider.id) {
                         try await provider.sendMessage(
                             text,
                             conversation: history,
@@ -120,18 +126,18 @@ final class ChatViewModel {
                     outputTokens = response.outputTokenCount
                     
                     // Track usage
-                    UsageManager.shared.track(response: response)
+                    diContainer.usageManager.track(response: response)
                     
                     // Update context
-                    ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
+                    diContainer.contextManager.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
                 }
 
                 let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
                 lastResponseLatency = latency
                 
                 // Observability: Track latency
-                ObservabilityManager.shared.trackLatency(provider: provider.id, durationMs: latency)
-                ObservabilityManager.shared.log("Response received from \(provider.displayName) in \(Int(latency))ms", level: .info, subsystem: "Chat")
+                diContainer.observabilityManager.trackLatency(provider: provider.id, durationMs: latency)
+                diContainer.observabilityManager.log("Response received from \(provider.displayName) in \(Int(latency))ms", level: .info, subsystem: "Chat")
 
                 // Track usage (if not already tracked in non-streaming, but let's just track again or track correctly)
                 // Actually usage is tracked in non-streaming block above.
@@ -145,7 +151,7 @@ final class ChatViewModel {
                         model: settings.modelName,
                         providerID: provider.id
                     )
-                    UsageManager.shared.track(response: response)
+                    diContainer.usageManager.track(response: response)
                 }
 
                 // Save completed assistant message
@@ -163,13 +169,13 @@ final class ChatViewModel {
                 conversation.updatedAt = Date()
                 
                 // Update context after response
-                ContextManager.shared.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
+                diContainer.contextManager.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
 
                 try? modelContext.save()
 
                 // Trigger auto-backup if enabled
                 Task {
-                    await S3BackupManager.shared.autoBackupIfNeeded(modelContext: modelContext)
+                    await diContainer.s3BackupManager.autoBackupIfNeeded(modelContext: modelContext)
                 }
 
                 streamingText = ""
@@ -180,8 +186,8 @@ final class ChatViewModel {
                 isStreaming = false
                 
                 // Observability: Track error
-                ObservabilityManager.shared.trackError(provider: provider.id)
-                ObservabilityManager.shared.log("Error from \(provider.displayName): \(error.localizedDescription)", level: .error, subsystem: "Chat")
+                diContainer.observabilityManager.trackError(provider: provider.id)
+                diContainer.observabilityManager.log("Error from \(provider.displayName): \(error.localizedDescription)", level: .error, subsystem: "Chat")
 
                 // Save partial response if any
                 if !streamingText.isEmpty {

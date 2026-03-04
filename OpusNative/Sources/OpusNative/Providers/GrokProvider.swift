@@ -11,16 +11,19 @@ final class GrokProvider: AIProvider, @unchecked Sendable {
     let supportsTools = false
 
     let availableModels = [
-        "grok-3",
-        "grok-3-fast",
-        "grok-3-mini",
-        "grok-3-mini-fast",
-        "grok-2",
-        "grok-2-vision"
+        "grok-beta",
+        "grok-2-vision-1212",
+        "grok-2-1212"
     ]
 
     private let baseURL = "https://api.x.ai/v1/chat/completions"
     private let session = URLSession.shared
+    
+    private let keychain: KeychainService
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
 
     // MARK: - Send Message
 
@@ -103,7 +106,7 @@ final class GrokProvider: AIProvider, @unchecked Sendable {
     }
 
     private func getAPIKey() throws -> String {
-        guard let key = KeychainService.shared.load(key: KeychainService.grokAPIKey),
+        guard let key = keychain.load(key: KeychainService.grokAPIKey),
               !key.isEmpty else {
             throw AIProviderError.missingAPIKey(provider: displayName)
         }

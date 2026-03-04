@@ -14,13 +14,15 @@ struct GenericAPIProvider: AIProvider, Sendable {
     let availableModels: [String]
 
     private let config: ProviderPluginConfig
+    private let keychain: KeychainService
 
-    init(pluginID: String, pluginName: String, config: ProviderPluginConfig) {
+    init(pluginID: String, pluginName: String, config: ProviderPluginConfig, keychain: KeychainService) {
         self.id = pluginID
         self.displayName = pluginName
         self.supportsStreaming = config.supportsStreaming
         self.availableModels = config.models
         self.config = config
+        self.keychain = keychain
     }
 
     // MARK: - AIProvider
@@ -221,6 +223,6 @@ struct GenericAPIProvider: AIProvider, Sendable {
 
     private func resolveAPIKey() -> String? {
         guard let keyName = config.authKeyName else { return nil }
-        return KeychainService.shared.load(key: keyName)
+        return keychain.load(key: keyName)
     }
 }

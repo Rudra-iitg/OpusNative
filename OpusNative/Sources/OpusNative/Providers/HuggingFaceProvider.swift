@@ -20,8 +20,14 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
         "HuggingFaceH4/zephyr-7b-beta"
     ]
 
-    private let baseURL = "https://router.huggingface.co/v1"
+    private let defaultModel = "meta-llama/Meta-Llama-3-8B-Instruct"
     private let session = URLSession.shared
+    
+    private let keychain: KeychainService
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
 
     // MARK: - Send Message
 
@@ -30,10 +36,10 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
         conversation: [MessageDTO],
         settings: ModelSettings
     ) async throws -> AIResponse {
-        let token = try getToken()
+        let token = try getAPIKey()
         let startTime = CFAbsoluteTimeGetCurrent()
 
-        let endpoint = "\(baseURL)/chat/completions"
+        let endpoint = "https://router.huggingface.co/v1/chat/completions"
         guard let url = URL(string: endpoint) else {
             throw AIProviderError.modelNotAvailable(model: settings.modelName)
         }
@@ -92,8 +98,8 @@ final class HuggingFaceProvider: AIProvider, @unchecked Sendable {
 
     // MARK: - Private Helpers
 
-    private func getToken() throws -> String {
-        guard let token = KeychainService.shared.load(key: KeychainService.huggingfaceToken),
+    private func getAPIKey() throws -> String {
+        guard let token = keychain.load(key: KeychainService.huggingfaceToken),
               !token.isEmpty else {
             throw AIProviderError.missingAPIKey(provider: displayName)
         }

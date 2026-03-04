@@ -6,7 +6,7 @@ final class KeychainService: @unchecked Sendable {
     static let shared = KeychainService()
     private let service = "com.opusnative.credentials"
 
-    private init() {}
+    init() {}
 
     // MARK: - Public API
 

@@ -19,6 +19,12 @@ final class AWSBedrockProvider: AIProvider, @unchecked Sendable {
         "anthropic.claude-3-haiku-20240307-v1:0",
         "amazon.titan-text-express-v1"
     ]
+    
+    private let keychain: KeychainService
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
 
     private let bedrockService = BedrockService()
 
@@ -91,8 +97,8 @@ final class AWSBedrockProvider: AIProvider, @unchecked Sendable {
     }
 
     private func getCredentials() throws -> AWSCredentials {
-        guard let accessKey = KeychainService.shared.load(key: KeychainService.accessKeyID),
-              let secretKey = KeychainService.shared.load(key: KeychainService.secretAccessKey),
+        guard let accessKey = keychain.load(key: KeychainService.accessKeyID),
+              let secretKey = keychain.load(key: KeychainService.secretAccessKey),
               !accessKey.isEmpty, !secretKey.isEmpty else {
             throw AIProviderError.missingAPIKey(provider: displayName)
         }

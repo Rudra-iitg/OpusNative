@@ -12,6 +12,11 @@ final class FileAnalyzer {
     var analysisResult: String = ""
     var selectedFileName: String = ""
     var errorMessage: String?
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+    }
 
     /// Open a file picker and return the file content
     func pickFile() -> (name: String, content: String, isImage: Bool)? {
@@ -59,7 +64,7 @@ final class FileAnalyzer {
 
     /// Analyze the given file content using the active provider
     func analyzeFile(content: String, fileName: String, isImage: Bool) async {
-        guard let provider = AIManager.shared.activeProvider else {
+        guard let provider = diContainer.aiManager.activeProvider else {
             errorMessage = "No active provider configured."
             return
         }
@@ -94,12 +99,12 @@ final class FileAnalyzer {
         }
 
         do {
-            let settings = AIManager.shared.settings
+            let settings = diContainer.aiManager.settings
             let response = try await provider.sendMessage(prompt, conversation: [], settings: settings)
             analysisResult = response.content
 
             // Persist for S3 backup
-            S3BackupManager.saveToolAnalysis(
+            diContainer.s3BackupManager.saveToolAnalysis(
                 type: "file",
                 title: fileName,
                 content: response.content,

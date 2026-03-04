@@ -7,6 +7,8 @@ struct OpusNativeApp: App {
     let sharedModelContainer: ModelContainer?
     /// Error message if model container creation failed
     let containerError: String?
+    
+    @State private var diContainer = AppDIContainer()
 
     init() {
         let schema = Schema([
@@ -44,11 +46,12 @@ struct OpusNativeApp: App {
     @ViewBuilder
     private var rootView: some View {
         if let container = sharedModelContainer {
-            ContentView()
+            ContentView(diContainer: diContainer)
                 .modelContainer(container)
+                .environment(diContainer)
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
-                    Task { await VectorStore.shared.flush() }
-                    ObservabilityManager.shared.flush()
+                    Task { await diContainer.vectorStore.flush() }
+                    diContainer.observabilityManager.flush()
                 }
         } else {
             DataErrorView(errorMessage: containerError ?? "Unknown error")
@@ -58,8 +61,9 @@ struct OpusNativeApp: App {
     @ViewBuilder
     private var settingsView: some View {
         if let container = sharedModelContainer {
-            SettingsView()
+            SettingsView(diContainer: diContainer)
                 .modelContainer(container)
+                .environment(diContainer)
         } else {
             Text("Settings unavailable — data store error.")
                 .padding()

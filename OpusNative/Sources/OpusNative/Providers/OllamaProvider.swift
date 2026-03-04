@@ -73,12 +73,18 @@ final class OllamaProvider: AIProvider, EmbeddingGenerator, @unchecked Sendable 
     private let session = URLSession.shared
 
     /// Get the configured Ollama base URL (defaults to localhost)
-    var baseURL: String {
-        let saved = KeychainService.shared.load(key: KeychainService.ollamaBaseURL)
-        if let url = saved, !url.isEmpty {
-            return url.hasSuffix("/") ? String(url.dropLast()) : url
+    private var baseURL: String {
+        let saved = keychain.load(key: KeychainService.ollamaBaseURL)
+        if let saved, !saved.isEmpty {
+            return saved.hasSuffix("/") ? String(saved.dropLast()) : saved
         }
         return "http://localhost:11434"
+    }
+    
+    private let keychain: KeychainService
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
     }
 
     // MARK: - Fetch Available Models

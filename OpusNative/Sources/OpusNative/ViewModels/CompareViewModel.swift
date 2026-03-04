@@ -8,6 +8,12 @@ import SwiftData
 @Observable
 @MainActor
 final class CompareViewModel {
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+    }
+    
     var prompt: String = ""
     var entries: [CompareEntry] = []  // Models to compare
     var results: [CompareResult] = []
@@ -66,12 +72,12 @@ final class CompareViewModel {
 
     /// All configured providers the user can add from
     var configuredProviders: [(any AIProvider)] {
-        AIManager.shared.providers.filter { AIManager.shared.isProviderConfigured($0.id) }
+        diContainer.aiManager.providers.filter { diContainer.aiManager.isProviderConfigured($0.id) }
     }
 
     /// Get available models for a provider
     func modelsForProvider(_ id: String) -> [String] {
-        let aiManager = AIManager.shared
+        let aiManager = diContainer.aiManager
         if id == "ollama" && !aiManager.ollamaModels.isEmpty {
             return aiManager.ollamaModels.map(\.name)
         }
@@ -80,7 +86,7 @@ final class CompareViewModel {
 
     /// Add a model to the comparison
     func addEntry(providerID: String, modelName: String) {
-        let provider = AIManager.shared.provider(for: providerID)
+        let provider = diContainer.aiManager.provider(for: providerID)
         let entry = CompareEntry(
             providerID: providerID,
             providerName: provider?.displayName ?? providerID,
@@ -201,7 +207,7 @@ final class CompareViewModel {
         clearEvaluationState()
         errorMessage = nil
 
-        let aiManager = AIManager.shared
+        let aiManager = diContainer.aiManager
 
         // Ensure Ollama models are fetched
         if entries.contains(where: { $0.providerID == "ollama" }) && aiManager.ollamaModels.isEmpty {
@@ -234,7 +240,7 @@ final class CompareViewModel {
                 group.addTask {
                     let startTime = CFAbsoluteTimeGetCurrent()
                     do {
-                        let response = try await RequestQueue.shared.execute(providerID: providerID) {
+                        let response = try await self.diContainer.requestQueue.execute(providerID: providerID) {
                             try await provider.sendMessage(
                                 text,
                                 conversation: [],

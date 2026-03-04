@@ -26,7 +26,7 @@ final class EmbeddingPlaygroundViewModel {
     }
     
     // Dependencies
-    private let service = EmbeddingService.shared
+    private let service = EmbeddingService()
     
     // MARK: - Actions
     

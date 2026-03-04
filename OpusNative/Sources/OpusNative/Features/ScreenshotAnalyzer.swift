@@ -13,6 +13,11 @@ final class ScreenshotAnalyzer {
     var capturedImage: NSImage?
     var analysisResult: String = ""
     var errorMessage: String?
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+    }
 
     /// Capture the main screen using ScreenCaptureKit
     func captureScreen() async {
@@ -59,7 +64,7 @@ final class ScreenshotAnalyzer {
             return
         }
 
-        guard let provider = AIManager.shared.activeProvider else {
+        guard let provider = diContainer.aiManager.activeProvider else {
             errorMessage = "No active provider configured."
             return
         }
@@ -85,14 +90,14 @@ final class ScreenshotAnalyzer {
         let imagePrompt = "\(prompt)\n\n[Screenshot attached as base64 PNG, \(pngData.count / 1024)KB]"
 
         do {
-            let settings = AIManager.shared.settings
+            let settings = diContainer.aiManager.settings
             let response = try await provider.sendMessage(imagePrompt, conversation: [], settings: settings)
             analysisResult = response.content
 
             // Persist for S3 backup
-            S3BackupManager.saveToolAnalysis(
+            diContainer.s3BackupManager.saveToolAnalysis(
                 type: "screenshot",
-                title: "Screenshot Analysis",
+                title: "Screen Capture",
                 content: response.content,
                 toKey: "screenshotAnalysisHistory"
             )

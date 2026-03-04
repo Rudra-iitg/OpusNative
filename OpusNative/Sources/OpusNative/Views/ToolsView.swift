@@ -2,16 +2,27 @@ import SwiftUI
 
 /// Tools view providing quick access to File Analyzer, Clipboard Monitor, and Screenshot Analyzer.
 struct ToolsView: View {
-    @State private var fileAnalyzer = FileAnalyzer()
-    @State private var clipboardMonitor = ClipboardMonitor()
-    @State private var screenshotAnalyzer = ScreenshotAnalyzer()
+    @State private var fileAnalyzer: FileAnalyzer
+    @State private var clipboardMonitor: ClipboardMonitor
+    @State private var screenshotAnalyzer: ScreenshotAnalyzer
     @State private var selectedTool: ToolType = .files
+    
+    @Environment(AppDIContainer.self) private var environmentDIContainer
+    private var diContainer: AppDIContainer { environmentDIContainer }
+    
+    init(diContainer: AppDIContainer) {
+        self._fileAnalyzer = State(initialValue: FileAnalyzer(diContainer: diContainer))
+        self._clipboardMonitor = State(initialValue: ClipboardMonitor(diContainer: diContainer))
+        self._screenshotAnalyzer = State(initialValue: ScreenshotAnalyzer(diContainer: diContainer))
+    }
+    private var themeManager: ThemeManager { diContainer.themeManager }
+    private var aiManager: AIManager { diContainer.aiManager }
 
-    private var accentColor: Color { ThemeManager.shared.accent }
+    private var accentColor: Color { themeManager.accent }
 
     private var accentGradient: LinearGradient {
         LinearGradient(
-            colors: [ThemeManager.shared.accent, ThemeManager.shared.accentDark],
+            colors: [themeManager.accent, themeManager.accentDark],
             startPoint: .leading, endPoint: .trailing
         )
     }
@@ -33,11 +44,11 @@ struct ToolsView: View {
 
     /// Current provider name and model for display
     private var activeProviderName: String {
-        AIManager.shared.activeProvider?.displayName ?? "No Provider"
+        aiManager.activeProvider?.displayName ?? "No Provider"
     }
 
     private var activeModelName: String {
-        AIManager.shared.settings.modelName
+        aiManager.settings.modelName
     }
 
     var body: some View {

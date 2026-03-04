@@ -18,20 +18,26 @@ struct ToastView: View {
             }
         }
 
-        var color: Color {
+        // The color property will now be a function that takes the diContainer
+        // because ThemeManager.shared.accent is being replaced by diContainer.themeManager.accent
+        // and diContainer is a property of ToastView, not ToastType.
+        func color(using diContainer: AppDIContainer) -> Color {
             switch self {
             case .success: return .green
             case .error: return .red
-            case .info: return ThemeManager.shared.accent
+            case .info: return diContainer.themeManager.accent
             case .warning: return .orange
             }
         }
     }
 
+    @State private var offset: CGFloat = -50
+    @Environment(AppDIContainer.self) private var diContainer
+
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: type.icon)
-                .foregroundStyle(type.color)
+                .foregroundStyle(type.color(using: diContainer)) // Use the new color function
                 .font(.callout)
 
             Text(message)
@@ -59,7 +65,7 @@ struct ToastView: View {
                 .environment(\.colorScheme, .dark)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(type.color.opacity(0.3), lineWidth: 1)
+                        .strokeBorder(type.color(using: diContainer).opacity(0.3), lineWidth: 1)
                 )
                 .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
         )

@@ -18,7 +18,7 @@ final class PerformanceManager {
     private(set) var animationDuration: Double = 0.3
     private(set) var reduceTranslucency: Bool = false
     
-    private init() {
+    init() {
         self.isPerformanceModeEnabled = UserDefaults.standard.bool(forKey: "isPerformanceModeEnabled")
         
         // Listen for thermal state

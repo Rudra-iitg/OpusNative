@@ -7,7 +7,7 @@ import Foundation
 @Observable
 @MainActor
 final class AIManager {
-    static let shared = AIManager()
+    // static let shared removed for pure DI
 
     /// All registered providers
     private(set) var providers: [any AIProvider] = []
@@ -39,20 +39,21 @@ final class AIManager {
 
     /// Error message from the last Ollama model fetch attempt
     var ollamaModelError: String?
+    
+    let keychain: KeychainService
+    
+    /// Reference to PluginManager for checking if a provider is plugin-based
+    weak var pluginManager: PluginManager?
 
-    private init() {
+    init(keychain: KeychainService) {
+        self.keychain = keychain
         let savedProvider = UserDefaults.standard.string(forKey: "activeProviderID") ?? "anthropic"
         self.activeProviderID = savedProvider
         self.settings = ModelSettings.defaultFor(providerID: savedProvider)
         loadSettings()
         registerDefaultProviders()
 
-        // Defer plugin loading to avoid circular singleton access
-        // (PluginManager.loadPlugins → AIManager.shared.register → deadlock)
-        Task { @MainActor in
-            PluginManager.shared.loadPlugins()
-            PluginManager.shared.startWatching()
-        }
+        // Plugin loading is now handled by AppDIContainer after all dependencies are set up
     }
 
     // MARK: - Provider Registration
@@ -106,27 +107,27 @@ final class AIManager {
     func isProviderConfigured(_ providerID: String) -> Bool {
         switch providerID {
         case "anthropic":
-            return KeychainService.shared.load(key: KeychainService.anthropicAPIKey) != nil
+            return keychain.load(key: KeychainService.anthropicAPIKey) != nil
         case "openai":
-            return KeychainService.shared.load(key: KeychainService.openaiAPIKey) != nil
+            return keychain.load(key: KeychainService.openaiAPIKey) != nil
         case "huggingface":
-            return KeychainService.shared.load(key: KeychainService.huggingfaceToken) != nil
+            return keychain.load(key: KeychainService.huggingfaceToken) != nil
         case "ollama":
             return true // Local, no API key needed
         case "bedrock":
-            let access = KeychainService.shared.load(key: KeychainService.accessKeyID)
-            let secret = KeychainService.shared.load(key: KeychainService.secretAccessKey)
+            let access = keychain.load(key: KeychainService.accessKeyID)
+            let secret = keychain.load(key: KeychainService.secretAccessKey)
             return access != nil && secret != nil
         case "gemini":
-            return KeychainService.shared.load(key: KeychainService.geminiAPIKey) != nil
+            return keychain.load(key: KeychainService.geminiAPIKey) != nil
         case "grok":
-            return KeychainService.shared.load(key: KeychainService.grokAPIKey) != nil
+            return keychain.load(key: KeychainService.grokAPIKey) != nil
         default:
             // Check if it's a plugin provider
-            if PluginManager.shared.isPluginProvider(providerID) {
-                if let plugin = PluginManager.shared.plugin(for: providerID),
+            if let pm = pluginManager, pm.isPluginProvider(providerID) {
+                if let plugin = pm.plugin(for: providerID),
                    let keyName = plugin.provider?.authKeyName {
-                    return plugin.provider?.authType == "none" || KeychainService.shared.load(key: keyName) != nil
+                    return plugin.provider?.authType == "none" || keychain.load(key: keyName) != nil
                 }
                 return true
             }
@@ -204,13 +205,13 @@ final class AIManager {
     // MARK: - Default Providers
 
     private func registerDefaultProviders() {
-        register(provider: AnthropicProvider())
-        register(provider: OpenAIProvider())
-        register(provider: GeminiProvider())
-        register(provider: GrokProvider())
-        register(provider: HuggingFaceProvider())
-        register(provider: OllamaProvider())
-        register(provider: AWSBedrockProvider())
+        register(provider: AnthropicProvider(keychain: keychain))
+        register(provider: OpenAIProvider(keychain: keychain))
+        register(provider: GeminiProvider(keychain: keychain))
+        register(provider: GrokProvider(keychain: keychain))
+        register(provider: HuggingFaceProvider(keychain: keychain))
+        register(provider: OllamaProvider(keychain: keychain))
+        register(provider: AWSBedrockProvider(keychain: keychain))
     }
 }
 

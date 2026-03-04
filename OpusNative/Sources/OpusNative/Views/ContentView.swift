@@ -35,13 +35,22 @@ enum NavigationItem: String, CaseIterable, Identifiable {
 /// Root view: NavigationSplitView with sidebar navigation and dynamic detail panels.
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var chatVM = ChatViewModel()
-    @State private var compareVM = CompareViewModel()
-    @State private var codeAssistant = CodeAssistant()
+    @State private var chatVM: ChatViewModel
+    @State private var compareVM: CompareViewModel
+    @State private var codeAssistant: CodeAssistant
     @State private var selectedNav: NavigationItem? = .chat
     @State private var toastMessage: String?
     @State private var toastType: ToastView.ToastType = .info
     @State private var showCommandPalette = false
+    
+    let diContainer: AppDIContainer
+    
+    init(diContainer: AppDIContainer) {
+        self.diContainer = diContainer
+        self._chatVM = State(initialValue: ChatViewModel(diContainer: diContainer))
+        self._compareVM = State(initialValue: CompareViewModel(diContainer: diContainer))
+        self._codeAssistant = State(initialValue: CodeAssistant(diContainer: diContainer))
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -113,15 +122,15 @@ struct ContentView: View {
         case .promptLibrary:
             PromptLibraryView()
         case .embeddings:
-            EmbeddingDashboardView()
+            EmbeddingDashboardView(diContainer: diContainer)
         case .usage:
             UsageDashboardView()
         case .observability:
             ObservabilityDashboardView()
         case .tools:
-            ToolsView()
+            ToolsView(diContainer: diContainer)
         case .settings:
-            SettingsView()
+            SettingsView(diContainer: diContainer)
         case .none:
             ChatView(chatVM: chatVM)
         }

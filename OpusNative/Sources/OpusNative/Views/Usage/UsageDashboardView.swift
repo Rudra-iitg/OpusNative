@@ -2,7 +2,8 @@ import SwiftUI
 import Charts
 
 struct UsageDashboardView: View {
-    @State private var usageManager = UsageManager.shared
+    @Environment(AppDIContainer.self) private var diContainer
+    private var usageManager: UsageManager { diContainer.usageManager }
     
     var body: some View {
         ScrollView {
