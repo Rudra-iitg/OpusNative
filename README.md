@@ -12,30 +12,32 @@
   <img src="https://img.shields.io/badge/platform-macOS%2014%2B-blue?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/swift-5.9-orange?style=flat-square" alt="Swift" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
-  <img src="https://img.shields.io/badge/providers-5-purple?style=flat-square" alt="Providers" />
+  <img src="https://img.shields.io/badge/providers-8-purple?style=flat-square" alt="Providers" />
 </p>
 
 ---
 
-OpusNative is a **native macOS application** built with SwiftUI and SwiftData that connects you to multiple AI providers through a single, premium interface. Switch between Anthropic Claude, OpenAI GPT, HuggingFace, Ollama (local), and AWS Bedrock — or compare them side-by-side in real time.
+OpusNative is a **native macOS application** built with SwiftUI and SwiftData that connects you to multiple AI providers through a single, premium interface. Switch between Anthropic Claude, OpenAI GPT, Google Gemini, xAI Grok, HuggingFace, Ollama (local), Custom Generic APIs, and AWS Bedrock — or compare them side-by-side in real time.
 
 ## ✨ Features
 
 ### 💬 Multi-Provider Chat
-- **5 AI providers** in one unified interface — switch with a single click
-- **Real-time streaming** via SSE (Anthropic, OpenAI) and NDJSON (Ollama)
-- Token counts, response latency, and provider badges on every message
+- **8 AI providers** in one unified interface — switch with a single click
+- **Real-time streaming** via SSE and NDJSON
+- Support for **System Prompts / Personas** and **Custom API Endpoints**
 - Full conversation history persisted with SwiftData
+- Premium glassmorphism dark mode UI with smooth micro-animations
 
 ### ⚖️ Provider Comparison
 - Send the **same prompt to multiple providers** simultaneously
+- Dynamic **Compare Model Selector** to add/remove models on the fly
 - Results displayed side-by-side with color-coded latency ranking
-- Compare response quality, speed, and token usage at a glance
 
-### 🛠 Code Assistant
-- **5 code actions**: Explain, Review, Optimize, Find Bugs, Generate Tests
+### 🛠 Code Assistant & Plugins
+- **5 built-in code actions**: Explain, Review, Optimize, Find Bugs, Generate Tests
 - Split-pane editor with automatic language detection
-- Markdown-rendered analysis results
+- **Plugin System** for custom tools and third-party integrations
+- **Prompt Library** & **Command Palette** for fast workflow access
 
 ### 🔧 System Tools
 | Tool | Description |
@@ -44,33 +46,24 @@ OpusNative is a **native macOS application** built with SwiftUI and SwiftData th
 | **Clipboard Monitor** | Auto-detect clipboard content and analyze with AI |
 | **Screenshot Analyzer** | Capture your screen and get AI vision analysis |
 
-### ☁️ Cloud Backup
-- Encrypted S3 backups with **AES-256-GCM** encryption
-- AWS SigV4 authentication — no SDK dependency
-- One-click backup and restore of all conversation data
+### 🧠 Advanced Embeddings & Search
+- **Semantic Search**: Find relevant past conversations using cosine vector similarity.
+- **Advanced Workspace**: K-Means clustering, Anomaly Detection, PCA, and specialized t-SNE engines.
+- **Radar Charts & Heatmaps**: Compare models across axes like Speed, Context, Cost, and Intelligence.
+
+### ☁️ Cloud Backup & Data
+- Encrypted S3 backups with **AES-256-GCM** encryption and AWS SigV4 authentication
+- **Binary VectorStore format** with metadata for efficient memory and storage handling
+- **Export Conversations** to Markdown, raw JSON, or Jupyter Notebook format.
 
 ### 📊 Observability & Performance
 - **System Health Dashboard**: Real-time charts for latency, error rates, and token throughput.
-- **Performance Mode**: Auto-throttles UI effects (blur/translucency) based on thermal state.
-- **Structured Logging**: Centralized log/metric collection for debugging.
-
-### 🧠 Advanced Embeddings & Search
-- **Semantic Search**: Find relevant past conversations using vector similarity (cosine).
-- **Vector Store**: In-memory, hardware-accelerated (Accelerate framework) embedding database.
-- **Radar Charts**: Compare models across 4 axes: Speed, Context, Cost, and Intelligence.
-
-### 🔍 Context & Inspector
-- **Prompt Inspector**: View the exact raw prompt sent to the LLM (system + history).
-- **Context Monitor**: Real-time usage bar tracking token limits per model.
-
-### 📈 Reporting
-- **Export Conversations**: Download chats as nicely formatted **Markdown** or raw **JSON**.
-- **Metadata**: Includes timestamps, model used, and cost per message.
+- **Performance Mode**: Auto-throttles UI effects based on thermal state.
+- **Robust Queueing & Error Recovery**: Smart error boundaries, request retries, and rate-limit handling.
 
 ### 🔐 Security First
 - All API keys stored in **macOS Keychain** — never in UserDefaults or plaintext
 - Per-provider credential management
-- Encrypted cloud backups
 
 ---
 
@@ -78,34 +71,30 @@ OpusNative is a **native macOS application** built with SwiftUI and SwiftData th
 
 ```
 OpusNative/Sources/OpusNative/
-├── Core/                    # Protocol layer (AIProvider, AIResponse)
-├── Managers/                # Application Logic
-│   ├── AIManager.swift      # Provider orchestration
-│   ├── UsageManager.swift   # Token counting & cost tracking
-│   ├── ContextManager.swift # Context window limits
-│   ├── ObservabilityManager # Logs & Metrics
-│   └── PerformanceManager   # Thermal state & UI optimizations
-├── Providers/               # AI Implementations (Anthropic, OpenAI, Ollama, etc.)
+├── Core/                    # Protocol layer (AIProvider, AppDIContainer)
+├── Managers/                # Application Logic Orchestration
+├── Providers/               # AI Implementations (Anthropic, OpenAI, Ollama, Gemini, Grok, etc.)
 ├── Features/                # Functional Modules
-│   ├── Embeddings/          # Vector Store & Search Engines
-│   ├── Reporting/           # Export Logic
-│   ├── ScreenshotAnalyzer
-│   └── S3BackupManager
+│   ├── Embeddings/          # Vector Store, t-SNE Engine, Anomaly Detection
+│   ├── Reporting/           # Export Logic & Notebook execution
+│   └── S3BackupManager/
 ├── ViewModels/              # MVVM State Objects
-├── Models/                  # SwiftData Models (ChatMessage, Conversation)
+├── Models/                  # SwiftData Models
 ├── Views/                   # SwiftUI Interface
-│   ├── Chat/                # Main Chat & Input
-│   ├── Comparison/          # Radar Charts & Side-by-Side
+│   ├── Chat/                # Main Chat, Input Toolbar, Empty States
+│   ├── Compare/             # Side-by-Side Model Comparison
+│   ├── Settings/            # Modular Settings Tabs
 │   ├── Observability/       # Health Dashboard
-│   └── ...
+│   └── Components/          # Reusable UI (Bubbles, Badges, Layouts)
 └── Services/                # Low-level helpers (Keychain, Networking)
 ```
 
 **Design Principles:**
 - **MVVM** with `@Observable` and Swift Concurrency (`async/await`)
 - **Protocol-oriented** — all providers share `AIProvider` with `Sendable` compliance
-- **Zero external SDKs** — pure Foundation networking with manual SigV4 signing
-- **SwiftData** for persistence — automatic migrations, lightweight schema
+- **Zero external dependency networking** where possible, pure Foundation networking
+- **SwiftData** for lightweight persistence and automatic migrations
+- **Clean Architecture** via highly modular UI and Dependency Injection (AppDIContainer)
 
 ---
 
@@ -130,40 +119,17 @@ Press **⌘R** in Xcode to build and run.
 
 1. Open the app → **Settings** (⌘,)
 2. Navigate to the **Providers** tab
-3. Add your API key(s):
-
-| Provider | What You Need |
-|----------|---------------|
-| **Anthropic** | API key from [console.anthropic.com](https://console.anthropic.com) |
-| **OpenAI** | API key from [platform.openai.com](https://platform.openai.com) |
-| **HuggingFace** | Access token from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) |
-| **Ollama** | Install [ollama.com](https://ollama.com), run `ollama serve` — no key needed |
-| **AWS Bedrock** | AWS Access Key + Secret Key with Bedrock permissions |
+3. Add your API key(s) for your desired services (OpenAI, Anthropic, Gemini, Grok, HuggingFace, AWS Bedrock, etc.)
 
 ---
 
 ## 🎨 UI Design
 
-The interface features a **premium dark aesthetic** with:
-- Glassmorphism cards and panels
-- Dynamic gradient backgrounds
-- Smooth micro-animations and transitions
-- Provider-specific color coding throughout
-
----
-
-## 📦 Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| UI Framework | SwiftUI |
-| Data Layer | SwiftData |
-| Networking | URLSession + async/await |
-| Security | macOS Keychain + CryptoKit |
-| Screen Capture | ScreenCaptureKit |
-| Architecture | MVVM + Protocol-Oriented |
-| Concurrency | Swift Concurrency (structured) |
-| Minimum Target | macOS 14.0 (Sonoma) |
+The interface features a **premium dark aesthetic** redesigned for maximum developer experience:
+- Modular Chat Input and Provider Toolbars
+- Custom FlowLayouts and Provider Badges
+- Dynamic gradient backgrounds & Glassmorphism cards
+- Smooth micro-animations and streaming message bubbles
 
 ---
 
