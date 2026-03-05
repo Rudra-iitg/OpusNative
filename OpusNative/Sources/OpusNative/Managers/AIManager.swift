@@ -127,7 +127,19 @@ final class AIManager {
             return keychain.load(key: KeychainService.geminiAPIKey) != nil
         case "grok":
             return keychain.load(key: KeychainService.grokAPIKey) != nil
+        case "openrouter":
+            return keychain.load(key: KeychainService.openRouterAPIKey) != nil
+        case "litellm", "lmstudio":
+            return true
+        case "azure-openai":
+            let key = keychain.load(key: KeychainService.azureOpenAIAPIKey)
+            let resource = UserDefaults.standard.string(forKey: "azureOpenAIResourceName")
+            let deployment = UserDefaults.standard.string(forKey: "azureOpenAIDeploymentName")
+            return key != nil && resource?.isEmpty == false && deployment?.isEmpty == false
         default:
+            if providerID.hasPrefix("generic-") {
+                return true
+            }
             // Check if it's a plugin provider
             if let pm = pluginManager, pm.isPluginProvider(providerID) {
                 if let plugin = pm.plugin(for: providerID),
@@ -217,6 +229,15 @@ final class AIManager {
         register(provider: HuggingFaceProvider(keychain: keychain))
         register(provider: OllamaProvider(keychain: keychain))
         register(provider: AWSBedrockProvider(keychain: keychain))
+        
+        register(provider: OpenRouterProvider(keychain: keychain))
+        register(provider: LiteLLMProvider(keychain: keychain))
+        register(provider: LMStudioProvider())
+        register(provider: AzureOpenAIProvider(keychain: keychain))
+        
+        for endpoint in GenericEndpointManager.shared.endpoints {
+            register(provider: GenericOpenAICompatibleProvider(endpoint: endpoint))
+        }
     }
 }
 

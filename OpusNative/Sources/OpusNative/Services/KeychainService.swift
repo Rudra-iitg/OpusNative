@@ -94,6 +94,15 @@ extension KeychainService {
     static let s3BucketName = "s3-bucket-name"
     static let s3Region = "s3-region"
 
+    // OpenRouter
+    static let openRouterAPIKey = "openrouter-api-key"
+    
+    // LiteLLM
+    static let liteLLMAPIKey = "litellm-api-key"
+    
+    // Azure OpenAI
+    static let azureOpenAIAPIKey = "azure-openai-api-key"
+
     // Encryption
     static let backupEncryptionKey = "backup-encryption-key"
 }

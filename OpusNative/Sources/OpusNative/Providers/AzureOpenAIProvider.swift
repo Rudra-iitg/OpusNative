@@ -1,0 +1,248 @@
+import Foundation
+
+// MARK: - Azure OpenAI Provider
+
+/// Connects to Microsoft Azure OpenAI endpoints.
+/// Uses `api-key` header and customized URL structure instead of OpenAICompatibleProvider base.
+final class AzureOpenAIProvider: AIProvider, @unchecked Sendable {
+    let id = "azure-openai"
+    let displayName = "Azure OpenAI"
+    
+    var supportsVision = true
+    var supportsStreaming = true
+    var supportsTools = true
+    
+    let availableModels = ["azure-deployment-model"] // User configures deployment name implicitly
+    
+    private let keychain: KeychainService
+    private let session = URLSession.shared
+    
+    init(keychain: KeychainService) {
+        self.keychain = keychain
+    }
+    
+    // MARK: - Configuration fetching
+    
+    private func getResourceName() -> String {
+        return UserDefaults.standard.string(forKey: "azureOpenAIResourceName") ?? ""
+    }
+    
+    private func getDeploymentName() -> String {
+        return UserDefaults.standard.string(forKey: "azureOpenAIDeploymentName") ?? ""
+    }
+    
+    private func getAPIVersion() -> String {
+        return UserDefaults.standard.string(forKey: "azureOpenAIApiVersion") ?? "2024-02-01"
+    }
+
+    private func getAPIKey() throws -> String {
+        guard let key = keychain.load(key: KeychainService.azureOpenAIAPIKey), !key.isEmpty else {
+            throw AIProviderError.missingAPIKey(provider: displayName)
+        }
+        return key
+    }
+    
+    // MARK: - URL Builder
+    
+    private func buildURL() throws -> URL {
+        let resource = getResourceName()
+        let deployment = getDeploymentName()
+        let version = getAPIVersion()
+        
+        guard !resource.isEmpty, !deployment.isEmpty else {
+            throw AIProviderError.invalidResponse(provider: displayName, detail: "Resource Name and Deployment Name must be configured in Settings")
+        }
+        
+        let urlString = "https://\(resource).openai.azure.com/openai/deployments/\(deployment)/chat/completions?api-version=\(version)"
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        return url
+    }
+
+    // MARK: - Send Message (Non-Streaming)
+
+    func sendMessage(
+        _ message: String,
+        conversation: [MessageDTO],
+        settings: ModelSettings
+    ) async throws -> AIResponse {
+        let apiKey = try getAPIKey()
+        let startTime = CFAbsoluteTimeGetCurrent()
+
+        let request = try buildRequest(
+            message: message,
+            conversation: conversation,
+            settings: settings,
+            apiKey: apiKey,
+            stream: false
+        )
+
+        let (data, response) = try await session.data(for: request)
+        let latency = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AIProviderError.invalidResponse(provider: displayName, detail: "Not an HTTP response")
+        }
+
+        try handleHTTPErrors(httpResponse, data: data)
+
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let choices = json["choices"] as? [[String: Any]],
+              let first = choices.first,
+              let msg = first["message"] as? [String: Any],
+              let content = msg["content"] as? String else {
+            throw AIProviderError.invalidResponse(provider: displayName, detail: "Could not parse response")
+        }
+
+        var inputTokens: Int?
+        var outputTokens: Int?
+        
+        if let usage = json["usage"] as? [String: Any] {
+            inputTokens = usage["prompt_tokens"] as? Int
+            outputTokens = usage["completion_tokens"] as? Int
+        }
+
+        let finishReason = first["finish_reason"] as? String
+
+        return AIResponse(
+            content: content,
+            inputTokenCount: inputTokens,
+            outputTokenCount: outputTokens,
+            latencyMs: latency,
+            model: settings.modelName,
+            providerID: id,
+            finishReason: finishReason
+        )
+    }
+
+    // MARK: - Stream Message
+
+    func streamMessage(
+        _ message: String,
+        conversation: [MessageDTO],
+        settings: ModelSettings
+    ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
+        let apiKey = try getAPIKey()
+
+        let request = try buildRequest(
+            message: message,
+            conversation: conversation,
+            settings: settings,
+            apiKey: apiKey,
+            stream: true
+        )
+
+        let (byteStream, response) = try await session.bytes(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AIProviderError.invalidResponse(provider: displayName, detail: "Not an HTTP response")
+        }
+
+        if !(200...299).contains(httpResponse.statusCode) {
+            var errorData = Data()
+            for try await byte in byteStream { errorData.append(byte) }
+            try handleHTTPErrors(httpResponse, data: errorData)
+        }
+
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await line in byteStream.lines {
+                        if line.hasPrefix("data: ") {
+                            let jsonStr = String(line.dropFirst(6))
+                            if jsonStr.trimmingCharacters(in: .whitespaces) == "[DONE]" { break }
+
+                            guard let data = jsonStr.data(using: .utf8),
+                                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                                continue
+                            }
+                            
+                            if let choices = json["choices"] as? [[String: Any]],
+                               let first = choices.first {
+                                // Check for content delta
+                                if let delta = first["delta"] as? [String: Any],
+                                   let content = delta["content"] as? String {
+                                    continuation.yield(.content(content))
+                                }
+                            }
+                            
+                            // Check for usage in stream chunk
+                            if let usage = json["usage"] as? [String: Any],
+                               let input = usage["prompt_tokens"] as? Int,
+                               let output = usage["completion_tokens"] as? Int {
+                                continuation.yield(.usage(input: input, output: output))
+                            }
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func buildRequest(
+        message: String,
+        conversation: [MessageDTO],
+        settings: ModelSettings,
+        apiKey: String,
+        stream: Bool
+    ) throws -> URLRequest {
+        let url = try buildURL()
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(apiKey, forHTTPHeaderField: "api-key") // Azure uses api-key instead of Authorization: Bearer
+
+        var messages: [[String: Any]] = []
+
+        if !settings.systemPrompt.isEmpty {
+            messages.append(["role": "system", "content": settings.systemPrompt])
+        }
+
+        for msg in conversation {
+            messages.append(["role": msg.role, "content": msg.content])
+        }
+
+        messages.append(["role": "user", "content": message])
+
+        var body: [String: Any] = [
+            "model": settings.modelName, // Ignored by Azure server-side, but standard OpenAI schema format
+            "messages": messages,
+            "max_tokens": settings.maxTokens,
+            "temperature": settings.temperature,
+            "top_p": settings.topP,
+            "stream": stream
+        ]
+
+        if stream {
+            body["stream_options"] = ["include_usage": true]
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        return request
+    }
+
+    private func handleHTTPErrors(_ response: HTTPURLResponse, data: Data) throws {
+        guard !(200...299).contains(response.statusCode) else { return }
+
+        let errorText = String(data: data, encoding: .utf8) ?? "Unknown error"
+        
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let errorObj = json["error"] as? [String: Any],
+           let message = errorObj["message"] as? String {
+            throw AIProviderError.serverError(statusCode: response.statusCode, message: message)
+        }
+
+        if response.statusCode == 429 {
+            throw AIProviderError.rateLimited(retryAfter: nil)
+        }
+
+        throw AIProviderError.serverError(statusCode: response.statusCode, message: errorText)
+    }
+}

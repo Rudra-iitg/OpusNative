@@ -14,6 +14,23 @@ final class SettingsViewModel {
     var grokKey: String = ""
     var ollamaBaseURL: String = "http://localhost:11434"
 
+    // OpenRouter
+    var openRouterKey: String = ""
+
+    // LiteLLM
+    var liteLLMBaseURL: String = "http://localhost:4000"
+    var liteLLMKey: String = ""
+
+    // LM Studio
+    var lmstudioBaseURL: String = "http://localhost:1234"
+    var isLMStudioRunning: Bool = false
+
+    // Azure OpenAI
+    var azureOpenAIResourceName: String = ""
+    var azureOpenAIDeploymentName: String = ""
+    var azureOpenAIApiVersion: String = "2024-02-01"
+    var azureOpenAIKey: String = ""
+
     // AWS Bedrock
     var accessKey: String = ""
     var secretKey: String = ""
@@ -92,6 +109,15 @@ final class SettingsViewModel {
         geminiKey = diContainer.keychainService.load(key: KeychainService.geminiAPIKey) ?? ""
         grokKey = diContainer.keychainService.load(key: KeychainService.grokAPIKey) ?? ""
         ollamaBaseURL = diContainer.keychainService.load(key: KeychainService.ollamaBaseURL) ?? "http://localhost:11434"
+        openRouterKey = diContainer.keychainService.load(key: KeychainService.openRouterAPIKey) ?? ""
+        liteLLMKey = diContainer.keychainService.load(key: KeychainService.liteLLMAPIKey) ?? ""
+        azureOpenAIKey = diContainer.keychainService.load(key: KeychainService.azureOpenAIAPIKey) ?? ""
+
+        liteLLMBaseURL = UserDefaults.standard.string(forKey: "liteLLMBaseURL") ?? "http://localhost:4000"
+        lmstudioBaseURL = UserDefaults.standard.string(forKey: "lmstudioBaseURL") ?? "http://localhost:1234"
+        azureOpenAIResourceName = UserDefaults.standard.string(forKey: "azureOpenAIResourceName") ?? ""
+        azureOpenAIDeploymentName = UserDefaults.standard.string(forKey: "azureOpenAIDeploymentName") ?? ""
+        azureOpenAIApiVersion = UserDefaults.standard.string(forKey: "azureOpenAIApiVersion") ?? "2024-02-01"
 
         // Bedrock
         accessKey = diContainer.keychainService.load(key: KeychainService.accessKeyID) ?? ""
@@ -141,6 +167,21 @@ final class SettingsViewModel {
         if !ollamaBaseURL.isEmpty {
             allSaved = diContainer.keychainService.save(key: KeychainService.ollamaBaseURL, value: ollamaBaseURL) && allSaved
         }
+        if !openRouterKey.isEmpty {
+            allSaved = diContainer.keychainService.save(key: KeychainService.openRouterAPIKey, value: openRouterKey) && allSaved
+        }
+        if !liteLLMKey.isEmpty {
+            allSaved = diContainer.keychainService.save(key: KeychainService.liteLLMAPIKey, value: liteLLMKey) && allSaved
+        }
+        if !azureOpenAIKey.isEmpty {
+            allSaved = diContainer.keychainService.save(key: KeychainService.azureOpenAIAPIKey, value: azureOpenAIKey) && allSaved
+        }
+
+        UserDefaults.standard.set(liteLLMBaseURL, forKey: "liteLLMBaseURL")
+        UserDefaults.standard.set(lmstudioBaseURL, forKey: "lmstudioBaseURL")
+        UserDefaults.standard.set(azureOpenAIResourceName, forKey: "azureOpenAIResourceName")
+        UserDefaults.standard.set(azureOpenAIDeploymentName, forKey: "azureOpenAIDeploymentName")
+        UserDefaults.standard.set(azureOpenAIApiVersion, forKey: "azureOpenAIApiVersion")
 
         // Bedrock
         if !accessKey.isEmpty {

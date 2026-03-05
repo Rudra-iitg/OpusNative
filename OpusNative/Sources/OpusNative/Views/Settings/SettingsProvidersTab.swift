@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsProvidersTab: View {
     @Bindable var viewModel: SettingsViewModel
     let accentColor: Color
+    
+    @State private var showingOpenRouterModels = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -56,6 +58,104 @@ struct SettingsProvidersTab: View {
                         .pickerStyle(.menu)
                     }
                 }
+            }
+
+            SettingsCardView(title: "OpenRouter", icon: "arrow.triangle.branch", accentColor: accentColor) {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Access 200+ models from multiple providers.")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                        Spacer()
+                    }
+                    SettingsSecureFieldView(label: "API Key", text: $viewModel.openRouterKey)
+                    
+                    Button {
+                        showingOpenRouterModels = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "list.bullet.rectangle")
+                            Text("Browse Models")
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundStyle(accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
+                }
+            }
+
+            SettingsCardView(title: "LiteLLM", icon: "link.badge.plus", accentColor: accentColor) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Self-hosted proxy for multiple providers.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Base URL")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                        TextField("http://localhost:4000", text: $viewModel.liteLLMBaseURL)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    
+                    SettingsSecureFieldView(label: "API Key (Optional)", text: $viewModel.liteLLMKey)
+                }
+            }
+
+            SettingsCardView(title: "LM Studio", icon: "cpu", accentColor: accentColor) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Local open-source models endpoint.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Base URL")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                        TextField("http://localhost:1234", text: $viewModel.lmstudioBaseURL)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                }
+            }
+
+            SettingsCardView(title: "Azure OpenAI", icon: "cloud.microsoft", accentColor: accentColor) {
+                VStack(alignment: .leading, spacing: 12) {
+                    SettingsSecureFieldView(label: "API Key", text: $viewModel.azureOpenAIKey)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Resource Name")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                        TextField("my-resource", text: $viewModel.azureOpenAIResourceName)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Deployment Name")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                        TextField("my-deployment", text: $viewModel.azureOpenAIDeploymentName)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("API Version")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.5))
+                        TextField("2024-02-01", text: $viewModel.azureOpenAIApiVersion)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                }
+            }
+            
+            SettingsGenericEndpointsView(accentColor: accentColor)
+        }
+        .sheet(isPresented: $showingOpenRouterModels) {
+            OpenRouterModelsSheet { selectedModel in
+                // Currently settings just holds provider credentials. 
+                // AIManager active settings configures the current model.
+                // We'll just let them browse for now, real model selection happens in SettingsModelTab.
             }
         }
     }
