@@ -117,6 +117,14 @@ struct ChatView: View {
                         .aspectRatio(contentMode: .fill)
                         .opacity(backgroundOpacity)
                         .clipped()
+                } else {
+                    // App Logo Watermark shadow
+                    Image("AppLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 350, height: 350)
+                        .opacity(0.05)
+                        .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 10)
                 }
 
                 RadialGradient(

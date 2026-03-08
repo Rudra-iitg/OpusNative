@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" width="256" height="256" alt="OpusNative Logo" />
+  <img src="assets/logo.svg" width="256" height="256" alt="Jiano Logo" />
 </p>
 
 <h1 align="center">OpusNative</h1>
