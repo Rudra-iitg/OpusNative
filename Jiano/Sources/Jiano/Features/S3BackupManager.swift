@@ -378,20 +378,30 @@ final class S3BackupManager {
 
     private func listS3ManifestKeys(config: S3Config) async throws -> [String] {
         let prefix = "opusnative-backups/manifests/"
-        let queryString = "list-type=2&prefix=\(prefix)"
+        // AWS SigV4 requires exact RFC 3986 encoding for query parameters.
+        // Specifically, '/' must be encoded as '%2F' in the canonical query string.
+        let encodedPrefix = prefix.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        
+        let path = "/"
+        let queryString = "list-type=2&prefix=\(encodedPrefix)"
         let endpoint = "https://\(config.bucket).s3.\(config.region).amazonaws.com/?\(queryString)"
+        
         guard let url = URL(string: endpoint) else { throw URLError(.badURL) }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
 
-        try signS3Request(request: &request, body: Data(), config: config, httpMethod: "GET", path: "/", queryString: queryString)
+        try signS3Request(request: &request, body: Data(), config: config, httpMethod: "GET", path: path, queryString: queryString)
 
         let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            throw NSError(domain: "S3", code: code, userInfo: [NSLocalizedDescriptionKey: "Failed to list S3 objects (HTTP \(code))"])
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "S3", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid response from S3"])
+        }
+        
+        if !(200...299).contains(httpResponse.statusCode) {
+            let errorXml = String(data: data, encoding: .utf8) ?? "Unknown Error"
+            print("S3 Error: \(errorXml)") // Useful for debugging AWS Signature errors
+            throw NSError(domain: "S3", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to list S3 objects (HTTP \(httpResponse.statusCode))"])
         }
 
         let xml = String(data: data, encoding: .utf8) ?? ""
