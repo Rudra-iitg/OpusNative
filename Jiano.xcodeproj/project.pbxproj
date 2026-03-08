@@ -16,24 +16,24 @@
 			containerPortal = C41C44692F3FC43600F72E26 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = C41C44702F3FC43600F72E26;
-			remoteInfo = OpusNative;
+			remoteInfo = Jiano;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C41C44712F3FC43600F72E26 /* OpusNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpusNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4AABB032F4FC00100000002 /* OpusNativeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpusNativeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C41C44712F3FC43600F72E26 /* Jiano.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jiano.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4AABB032F4FC00100000002 /* JianoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JianoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C41C44732F3FC43600F72E26 /* OpusNative */ = {
+		C41C44732F3FC43600F72E26 /* Jiano */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = OpusNative;
+			path = Jiano;
 			sourceTree = "<group>";
 		};
-		C4AABB072F4FC00100000003 /* OpusNativeTests */ = {
+		C4AABB072F4FC00100000003 /* JianoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = OpusNativeTests;
+			path = JianoTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -60,8 +60,8 @@
 		C41C44682F3FC43600F72E26 = {
 			isa = PBXGroup;
 			children = (
-				C41C44732F3FC43600F72E26 /* OpusNative */,
-				C4AABB072F4FC00100000003 /* OpusNativeTests */,
+				C41C44732F3FC43600F72E26 /* Jiano */,
+				C4AABB072F4FC00100000003 /* JianoTests */,
 				C41C44722F3FC43600F72E26 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -69,8 +69,8 @@
 		C41C44722F3FC43600F72E26 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C41C44712F3FC43600F72E26 /* OpusNative.app */,
-				C4AABB032F4FC00100000002 /* OpusNativeTests.xctest */,
+				C41C44712F3FC43600F72E26 /* Jiano.app */,
+				C4AABB032F4FC00100000002 /* JianoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,9 +78,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C41C44702F3FC43600F72E26 /* OpusNative */ = {
+		C41C44702F3FC43600F72E26 /* Jiano */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C41C447C2F3FC43800F72E26 /* Build configuration list for PBXNativeTarget "OpusNative" */;
+			buildConfigurationList = C41C447C2F3FC43800F72E26 /* Build configuration list for PBXNativeTarget "Jiano" */;
 			buildPhases = (
 				C41C446D2F3FC43600F72E26 /* Sources */,
 				C41C446E2F3FC43600F72E26 /* Frameworks */,
@@ -91,19 +91,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C41C44732F3FC43600F72E26 /* OpusNative */,
+				C41C44732F3FC43600F72E26 /* Jiano */,
 			);
-			name = OpusNative;
+			name = Jiano;
 			packageProductDependencies = (
 				C41C44B02F3FC70A00F72E26 /* MarkdownUI */,
 			);
-			productName = OpusNative;
-			productReference = C41C44712F3FC43600F72E26 /* OpusNative.app */;
+			productName = Jiano;
+			productReference = C41C44712F3FC43600F72E26 /* Jiano.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C4AABB002F4FC00100000005 /* OpusNativeTests */ = {
+		C4AABB002F4FC00100000005 /* JianoTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C4AABB0A2F4FC00100000006 /* Build configuration list for PBXNativeTarget "OpusNativeTests" */;
+			buildConfigurationList = C4AABB0A2F4FC00100000006 /* Build configuration list for PBXNativeTarget "JianoTests" */;
 			buildPhases = (
 				C4AABB052F4FC00100000007 /* Sources */,
 				C4AABB042F4FC00100000004 /* Frameworks */,
@@ -115,11 +115,11 @@
 				C4AABB022F4FC00100000009 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				C4AABB072F4FC00100000003 /* OpusNativeTests */,
+				C4AABB072F4FC00100000003 /* JianoTests */,
 			);
-			name = OpusNativeTests;
-			productName = OpusNativeTests;
-			productReference = C4AABB032F4FC00100000002 /* OpusNativeTests.xctest */;
+			name = JianoTests;
+			productName = JianoTests;
+			productReference = C4AABB032F4FC00100000002 /* JianoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -141,7 +141,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C41C446C2F3FC43600F72E26 /* Build configuration list for PBXProject "OpusNative" */;
+			buildConfigurationList = C41C446C2F3FC43600F72E26 /* Build configuration list for PBXProject "Jiano" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -158,8 +158,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C41C44702F3FC43600F72E26 /* OpusNative */,
-				C4AABB002F4FC00100000005 /* OpusNativeTests */,
+				C41C44702F3FC43600F72E26 /* Jiano */,
+				C4AABB002F4FC00100000005 /* JianoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -201,7 +201,7 @@
 /* Begin PBXTargetDependency section */
 		C4AABB022F4FC00100000009 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C41C44702F3FC43600F72E26 /* OpusNative */;
+			target = C41C44702F3FC43600F72E26 /* Jiano */;
 			targetProxy = C4AABB012F4FC00100000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -358,7 +358,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = None.OpusNative;
+				PRODUCT_BUNDLE_IDENTIFIER = None.Jiano;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -401,7 +401,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = None.OpusNative;
+				PRODUCT_BUNDLE_IDENTIFIER = None.Jiano;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -422,14 +422,14 @@
 				DEVELOPMENT_TEAM = D8HPZDTM25;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = None.OpusNativeTests;
+				PRODUCT_BUNDLE_IDENTIFIER = None.JianoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OpusNative.app/Contents/MacOS/OpusNative";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Jiano.app/Contents/MacOS/Jiano";
 			};
 			name = Debug;
 		};
@@ -442,21 +442,21 @@
 				DEVELOPMENT_TEAM = D8HPZDTM25;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = None.OpusNativeTests;
+				PRODUCT_BUNDLE_IDENTIFIER = None.JianoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OpusNative.app/Contents/MacOS/OpusNative";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Jiano.app/Contents/MacOS/Jiano";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C41C446C2F3FC43600F72E26 /* Build configuration list for PBXProject "OpusNative" */ = {
+		C41C446C2F3FC43600F72E26 /* Build configuration list for PBXProject "Jiano" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C41C447A2F3FC43800F72E26 /* Debug */,
@@ -465,7 +465,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C41C447C2F3FC43800F72E26 /* Build configuration list for PBXNativeTarget "OpusNative" */ = {
+		C41C447C2F3FC43800F72E26 /* Build configuration list for PBXNativeTarget "Jiano" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C41C447D2F3FC43800F72E26 /* Debug */,
@@ -474,7 +474,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C4AABB0A2F4FC00100000006 /* Build configuration list for PBXNativeTarget "OpusNativeTests" */ = {
+		C4AABB0A2F4FC00100000006 /* Build configuration list for PBXNativeTarget "JianoTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C4AABB0B2F4FC00100000010 /* Debug */,
