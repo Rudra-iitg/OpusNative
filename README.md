@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" width="256" height="256" alt="Jiano Logo" />
 </p>
 
-<h1 align="center">OpusNative</h1>
+<h1 align="center">Jiano</h1>
 
 <p align="center">
   <strong>A native macOS AI Workstation — one app, every provider.</strong>
