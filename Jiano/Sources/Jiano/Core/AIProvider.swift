@@ -2,12 +2,25 @@ import Foundation
 
 // MARK: - Message DTO (Sendable transfer type)
 
+/// Image payload carried by MessageDTO across concurrency boundaries.
+struct ImagePayload: Sendable {
+    let data: Data
+    let mimeType: String
+}
+
 /// Lightweight, Sendable message type used to pass conversation history across
 /// concurrency boundaries. Providers receive this instead of SwiftData's
 /// non-Sendable `ChatMessage` model objects.
 struct MessageDTO: Sendable {
     let role: String     // "user", "assistant", or "system"
     let content: String
+    let images: [ImagePayload]
+
+    init(role: String, content: String, images: [ImagePayload] = []) {
+        self.role = role
+        self.content = content
+        self.images = images
+    }
 }
 
 /// Chunk of data from a streaming response
@@ -43,6 +56,7 @@ protocol AIProvider: Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload],
         settings: ModelSettings
     ) async throws -> AIResponse
 
@@ -50,6 +64,7 @@ protocol AIProvider: Sendable {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error>
 }
@@ -61,9 +76,10 @@ extension AIProvider {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
-        let response = try await sendMessage(message, conversation: conversation, settings: settings)
+        let response = try await sendMessage(message, conversation: conversation, images: images, settings: settings)
         return AsyncThrowingStream { continuation in
             continuation.yield(.content(response.content))
             if let input = response.inputTokenCount, let output = response.outputTokenCount {
@@ -72,6 +88,15 @@ extension AIProvider {
             continuation.finish()
         }
     }
+
+    /// Convenience overload with no images (backward-compatible call sites)
+    func sendMessage(
+        _ message: String,
+        conversation: [MessageDTO],
+        settings: ModelSettings
+    ) async throws -> AIResponse {
+        try await sendMessage(message, conversation: conversation, images: [], settings: settings)
+    }
 }
 
 // MARK: - ChatMessage convenience
@@ -79,7 +104,8 @@ extension AIProvider {
 extension ChatMessage {
     /// Convert a SwiftData ChatMessage to a Sendable MessageDTO
     var toDTO: MessageDTO {
-        MessageDTO(role: role, content: content)
+        let imagePayloads = zip(imageData, imageMIMETypes).map { ImagePayload(data: $0, mimeType: $1) }
+        return MessageDTO(role: role, content: content, images: imagePayloads)
     }
 }
 

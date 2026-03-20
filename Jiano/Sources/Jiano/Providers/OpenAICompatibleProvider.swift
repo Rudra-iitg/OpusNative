@@ -47,6 +47,7 @@ class OpenAICompatibleProvider: AIProvider, @unchecked Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         let key = try getAPIKey()
@@ -104,6 +105,7 @@ class OpenAICompatibleProvider: AIProvider, @unchecked Sendable {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let key = try getAPIKey()
@@ -176,11 +178,22 @@ class OpenAICompatibleProvider: AIProvider, @unchecked Sendable {
         apiKey: String,
         stream: Bool
     ) throws -> URLRequest {
+        // Normalize base URL: strip trailing slash, then strip any existing path suffixes
+        // so we always end up with exactly <base>/v1/chat/completions
         var urlString = baseURL
-        if !urlString.hasSuffix("/v1/chat/completions") {
-            if !urlString.hasSuffix("/") { urlString += "/" }
-            urlString += "v1/chat/completions"
+        while urlString.hasSuffix("/") { urlString.removeLast() }
+        // Strip any partial path the user may have already included
+        for suffix in ["/v1/chat/completions", "/chat/completions"] {
+            if urlString.hasSuffix(suffix) {
+                urlString = String(urlString.dropLast(suffix.count))
+                break
+            }
         }
+        // Strip trailing /v1 so we can re-append it consistently
+        if urlString.hasSuffix("/v1") {
+            urlString = String(urlString.dropLast(3))
+        }
+        urlString += "/v1/chat/completions"
         
         guard let url = URL(string: urlString) else { throw URLError(.badURL) }
 

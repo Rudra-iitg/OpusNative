@@ -65,6 +65,7 @@ final class MockAIProvider: AIProvider, @unchecked Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         sendMessageCallCount += 1

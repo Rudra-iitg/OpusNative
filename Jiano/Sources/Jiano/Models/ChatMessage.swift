@@ -26,7 +26,14 @@ final class ChatMessage: Identifiable, Codable {
     /// Model used for this message
     var model: String?
 
-    init(role: String, content: String, conversation: Conversation? = nil, parentMessageID: UUID? = nil, providerID: String? = nil, tokenCount: Int? = nil, latencyMs: Double? = nil, model: String? = nil) {
+    /// Raw image bytes for attachments, stored outside the SQLite store to avoid bloat.
+    @Attribute(.externalStorage) var imageData: [Data] = []
+
+    /// Parallel array of MIME type strings for each image in imageData.
+    /// Index i corresponds to imageData[i].
+    var imageMIMETypes: [String] = []
+
+    init(role: String, content: String, conversation: Conversation? = nil, parentMessageID: UUID? = nil, providerID: String? = nil, tokenCount: Int? = nil, latencyMs: Double? = nil, model: String? = nil, imageData: [Data] = [], imageMIMETypes: [String] = []) {
         self.id = UUID()
         self.role = role
         self.content = content
@@ -37,6 +44,8 @@ final class ChatMessage: Identifiable, Codable {
         self.tokenCount = tokenCount
         self.latencyMs = latencyMs
         self.model = model
+        self.imageData = imageData
+        self.imageMIMETypes = imageMIMETypes
     }
 
     var isUser: Bool {
@@ -75,6 +84,7 @@ final class ChatMessage: Identifiable, Codable {
     
     enum CodingKeys: String, CodingKey {
         case id, role, content, timestamp, parentMessageID, providerID, tokenCount, latencyMs, model
+        case imageData, imageMIMETypes
     }
     
     required init(from decoder: Decoder) throws {
@@ -88,6 +98,8 @@ final class ChatMessage: Identifiable, Codable {
         tokenCount = try container.decodeIfPresent(Int.self, forKey: .tokenCount)
         latencyMs = try container.decodeIfPresent(Double.self, forKey: .latencyMs)
         model = try container.decodeIfPresent(String.self, forKey: .model)
+        imageData = try container.decodeIfPresent([Data].self, forKey: .imageData) ?? []
+        imageMIMETypes = try container.decodeIfPresent([String].self, forKey: .imageMIMETypes) ?? []
     }
     
     func encode(to encoder: Encoder) throws {
@@ -101,6 +113,8 @@ final class ChatMessage: Identifiable, Codable {
         try container.encode(tokenCount, forKey: .tokenCount)
         try container.encode(latencyMs, forKey: .latencyMs)
         try container.encode(model, forKey: .model)
+        try container.encode(imageData, forKey: .imageData)
+        try container.encode(imageMIMETypes, forKey: .imageMIMETypes)
     }
 }
 

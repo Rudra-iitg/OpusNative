@@ -30,6 +30,7 @@ struct GenericAPIProvider: AIProvider, Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         // Resolve API key

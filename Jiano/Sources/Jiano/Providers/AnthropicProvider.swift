@@ -33,6 +33,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         let apiKey = try getAPIKey()
@@ -41,6 +42,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         let request = try buildRequest(
             message: message,
             conversation: conversation,
+            images: images,
             settings: settings,
             apiKey: apiKey,
             stream: false
@@ -90,6 +92,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let apiKey = try getAPIKey()
@@ -97,6 +100,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         let request = try buildRequest(
             message: message,
             conversation: conversation,
+            images: images,
             settings: settings,
             apiKey: apiKey,
             stream: true
@@ -190,6 +194,7 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
     private func buildRequest(
         message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings,
         apiKey: String,
         stream: Bool
@@ -206,7 +211,24 @@ final class AnthropicProvider: AIProvider, @unchecked Sendable {
         var messages: [[String: Any]] = conversation.map { msg in
             ["role": msg.role, "content": msg.content]
         }
-        messages.append(["role": "user", "content": message])
+
+        // Build the current user message content
+        if images.isEmpty {
+            messages.append(["role": "user", "content": message])
+        } else {
+            var contentBlocks: [[String: Any]] = images.map { payload in
+                [
+                    "type": "image",
+                    "source": [
+                        "type": "base64",
+                        "media_type": payload.mimeType,
+                        "data": payload.data.base64EncodedString()
+                    ] as [String: Any]
+                ]
+            }
+            contentBlocks.append(["type": "text", "text": message])
+            messages.append(["role": "user", "content": contentBlocks])
+        }
 
         var body: [String: Any] = [
             "model": settings.modelName,

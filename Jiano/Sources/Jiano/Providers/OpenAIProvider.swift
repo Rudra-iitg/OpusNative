@@ -35,6 +35,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         let apiKey = try getAPIKey()
@@ -43,6 +44,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
         let request = try buildRequest(
             message: message,
             conversation: conversation,
+            images: images,
             settings: settings,
             apiKey: apiKey,
             stream: false
@@ -91,6 +93,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let apiKey = try getAPIKey()
@@ -98,6 +101,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
         let request = try buildRequest(
             message: message,
             conversation: conversation,
+            images: images,
             settings: settings,
             apiKey: apiKey,
             stream: true
@@ -167,6 +171,7 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
     private func buildRequest(
         message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings,
         apiKey: String,
         stream: Bool
@@ -191,7 +196,18 @@ final class OpenAIProvider: AIProvider, @unchecked Sendable {
         }
 
         // New user message
-        messages.append(["role": "user", "content": message])
+        if images.isEmpty {
+            messages.append(["role": "user", "content": message])
+        } else {
+            var contentBlocks: [[String: Any]] = images.map { payload in
+                [
+                    "type": "image_url",
+                    "image_url": ["url": "data:\(payload.mimeType);base64,\(payload.data.base64EncodedString())"]
+                ]
+            }
+            contentBlocks.append(["type": "text", "text": message])
+            messages.append(["role": "user", "content": contentBlocks])
+        }
 
         var body: [String: Any] = [
             "model": settings.modelName,

@@ -9,6 +9,7 @@ struct MessageBubbleView: View {
     @State private var selectedCodeBlock: CodeBlock?
     @State private var isHovered: Bool = false
     @State private var showCopied: Bool = false
+    @State private var fullScreenImage: NSImage?
     @Environment(AppDIContainer.self) private var diContainer
 
     private var themeManager: ThemeManager { diContainer.themeManager }
@@ -131,26 +132,85 @@ struct MessageBubbleView: View {
                 ArtifactView(codeBlock: block)
             }
         }
+        .sheet(isPresented: Binding(
+            get: { fullScreenImage != nil },
+            set: { if !$0 { fullScreenImage = nil } }
+        )) {
+            if let img = fullScreenImage {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("Close") { fullScreenImage = nil }
+                            .padding()
+                    }
+                    Image(nsImage: img)
+                        .resizable()
+                        .scaledToFit()
+                        .padding()
+                }
+                .frame(minWidth: 400, minHeight: 400)
+            }
+        }
     }
 
     // MARK: - User Bubble
 
     private var userBubble: some View {
-        Text(message.content)
-            .textSelection(.enabled)
-            .foregroundStyle(.white)
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(
-                        LinearGradient(
-                            colors: [accentColor, accentColor.opacity(0.85)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+        VStack(alignment: .trailing, spacing: 8) {
+            if !message.imageData.isEmpty {
+                imageGrid
+            }
+
+            Text(message.content)
+                .textSelection(.enabled)
+                .foregroundStyle(.white)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    LinearGradient(
+                        colors: [accentColor, accentColor.opacity(0.85)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
                     )
-                    .shadow(color: accentColor.opacity(0.2), radius: 10, y: 4)
-            )
+                )
+                .shadow(color: accentColor.opacity(0.2), radius: 10, y: 4)
+        )
+    }
+
+    private var imageGrid: some View {
+        let columns = message.imageData.count == 1
+            ? [GridItem(.flexible())]
+            : [GridItem(.flexible()), GridItem(.flexible())]
+
+        return LazyVGrid(columns: columns, spacing: 8) {
+            ForEach(Array(message.imageData.enumerated()), id: \.offset) { _, data in
+                if let nsImage = NSImage(data: data) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 300, maxHeight: 300)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .onTapGesture {
+                            fullScreenImage = nsImage
+                        }
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: 120, height: 120)
+                        .overlay(
+                            VStack(spacing: 4) {
+                                Image(systemName: "photo")
+                                    .font(.title2)
+                                Text("Image unavailable")
+                                    .font(.caption)
+                            }
+                            .foregroundStyle(.white.opacity(0.5))
+                        )
+                }
+            }
+        }
     }
 
     // MARK: - Assistant Bubble

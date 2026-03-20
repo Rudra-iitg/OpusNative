@@ -52,8 +52,51 @@ final class AIManager {
         self.settings = ModelSettings.defaultFor(providerID: savedProvider)
         loadSettings()
         registerDefaultProviders()
+        observeGenericEndpoints()
 
         // Plugin loading is now handled by AppDIContainer after all dependencies are set up
+    }
+
+    // MARK: - Generic Endpoint Live Sync
+
+    private var endpointObservationTask: Task<Void, Never>?
+
+    /// Watches GenericEndpointManager for changes and keeps AIManager.providers in sync.
+    private func observeGenericEndpoints() {
+        endpointObservationTask = Task { [weak self] in
+            var lastEndpoints: [SavedEndpoint] = GenericEndpointManager.shared.endpoints
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 500_000_000) // poll every 0.5s
+                guard let self else { return }
+                let current = GenericEndpointManager.shared.endpoints
+                guard current != lastEndpoints else { continue }
+                await MainActor.run { self.syncGenericProviders(current) }
+                lastEndpoints = current
+            }
+        }
+    }
+
+    /// Reconciles AIManager.providers with the given endpoint list.
+    private func syncGenericProviders(_ endpoints: [SavedEndpoint]) {
+        let currentIDs = Set(endpoints.map { "generic-\($0.id.uuidString)" })
+        let registeredGenericIDs = Set(providers.compactMap { p -> String? in
+            p.id.hasPrefix("generic-") ? p.id : nil
+        })
+
+        // Remove deleted endpoints
+        for id in registeredGenericIDs.subtracting(currentIDs) {
+            unregister(providerID: id)
+            if activeProviderID == id {
+                switchProvider(to: "anthropic")
+            }
+        }
+
+        // Add or update endpoints
+        for endpoint in endpoints {
+            let pid = "generic-\(endpoint.id.uuidString)"
+            unregister(providerID: pid) // remove stale version if present
+            register(provider: GenericOpenAICompatibleProvider(endpoint: endpoint))
+        }
     }
     
     deinit {

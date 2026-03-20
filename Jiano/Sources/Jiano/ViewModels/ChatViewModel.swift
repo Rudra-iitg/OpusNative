@@ -1,5 +1,7 @@
+import AppKit
 import Foundation
 import SwiftData
+import UniformTypeIdentifiers
 
 /// Main ViewModel driving the chat experience.
 /// Uses AIManager for multi-provider support with token tracking and latency display.
@@ -25,6 +27,84 @@ final class ChatViewModel {
     }
     var lastResponseLatency: Double = 0
     var lastResponseTokens: Int?
+
+    // MARK: - Image Attachments
+    var pendingAttachments: [ImageAttachment] = []
+    var attachmentError: String?
+
+    private static let supportedImageTypes: [UTType] = [.jpeg, .png, .gif, .webP, .heic]
+    private static let maxFileSizeBytes = 20 * 1024 * 1024  // 20 MB
+    private static let maxAttachmentCount = 5
+
+    func addAttachments(_ urls: [URL]) {
+        var newAttachments: [ImageAttachment] = []
+
+        for url in urls {
+            // Validate UTType
+            let utType = UTType(filenameExtension: url.pathExtension)
+            let isSupported = utType.map { type in
+                Self.supportedImageTypes.contains { type.conforms(to: $0) }
+            } ?? false
+
+            guard isSupported else {
+                attachmentError = "\"\(url.lastPathComponent)\" is not a supported image type. Supported types: JPEG, PNG, GIF, WebP, HEIC."
+                continue
+            }
+
+            // Read file data
+            guard let data = try? Data(contentsOf: url) else {
+                attachmentError = "Could not read file \"\(url.lastPathComponent)\"."
+                continue
+            }
+
+            // Enforce 20 MB size limit
+            guard data.count <= Self.maxFileSizeBytes else {
+                attachmentError = "\"\(url.lastPathComponent)\" exceeds the 20 MB file size limit."
+                continue
+            }
+
+            // Determine MIME type
+            let mimeType: String
+            if let type = utType {
+                if type.conforms(to: .jpeg) { mimeType = "image/jpeg" }
+                else if type.conforms(to: .png) { mimeType = "image/png" }
+                else if type.conforms(to: .gif) { mimeType = "image/gif" }
+                else if type.conforms(to: .webP) { mimeType = "image/webp" }
+                else if type.conforms(to: .heic) { mimeType = "image/heic" }
+                else { mimeType = "image/jpeg" }
+            } else {
+                mimeType = "image/jpeg"
+            }
+
+            newAttachments.append(ImageAttachment(data: data, mimeType: mimeType, filename: url.lastPathComponent))
+        }
+
+        // Enforce 5-image cap
+        let remainingSlots = Self.maxAttachmentCount - pendingAttachments.count
+        if newAttachments.count > remainingSlots {
+            attachmentError = "You can attach up to \(Self.maxAttachmentCount) images per message. The limit has been reached."
+            newAttachments = Array(newAttachments.prefix(remainingSlots))
+        }
+
+        pendingAttachments.append(contentsOf: newAttachments)
+    }
+
+    func removeAttachment(id: UUID) {
+        pendingAttachments.removeAll { $0.id == id }
+    }
+
+    func openFilePicker() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowedContentTypes = [.jpeg, .png, .gif, .webP, .heic]
+        panel.title = "Select Images"
+
+        if panel.runModal() == .OK {
+            addAttachments(panel.urls)
+        }
+    }
 
     private var streamTask: Task<Void, Never>?
     
@@ -67,8 +147,18 @@ final class ChatViewModel {
 
         guard let conversation = selectedConversation else { return }
 
-        // Add user message
-        let userMessage = ChatMessage(role: "user", content: text, conversation: conversation, model: settings.modelName)
+        // Add user message, chaining it to the current branch leaf
+        let capturedAttachments = pendingAttachments
+        let previousLeafID = conversation.sortedMessages.last?.id
+        let userMessage = ChatMessage(
+            role: "user",
+            content: text,
+            conversation: conversation,
+            parentMessageID: previousLeafID,
+            model: settings.modelName,
+            imageData: capturedAttachments.map { $0.data },
+            imageMIMETypes: capturedAttachments.map { $0.mimeType }
+        )
         modelContext.insert(userMessage)
         conversation.messages.append(userMessage)
         conversation.updatedAt = Date()
@@ -77,7 +167,39 @@ final class ChatViewModel {
         diContainer.contextManager.updateUsage(messages: conversation.sortedMessages, model: settings.modelName)
 
         currentMessage = ""
+        pendingAttachments = []
+        attachmentError = nil
         errorMessage = nil
+
+        // Validate attachments for vision support and size limits
+        let attachmentsToSend: [ImageAttachment]
+        if !capturedAttachments.isEmpty {
+            if !provider.supportsVision {
+                // Non-vision provider: silently drop images, send text only
+                attachmentsToSend = []
+            } else {
+                // Check per-image base64 size limits
+                let isAnthropic = provider.id == "anthropic"
+                let base64Limit = isAnthropic ? 5 * 1024 * 1024 : 20 * 1024 * 1024
+                let providerName = isAnthropic ? "Anthropic" : "OpenAI"
+
+                var oversized = false
+                for attachment in capturedAttachments {
+                    // Approximate base64 size: every 3 bytes become 4 base64 chars
+                    let base64Size = (attachment.data.count * 4 + 2) / 3
+                    if base64Size > base64Limit {
+                        errorMessage = "An image exceeds the \(providerName) size limit (\(isAnthropic ? "5" : "20") MB). Please remove it and try again."
+                        isStreaming = false
+                        oversized = true
+                        break
+                    }
+                }
+                if oversized { return }
+                attachmentsToSend = capturedAttachments
+            }
+        } else {
+            attachmentsToSend = []
+        }
 
         // Start streaming
         isStreaming = true
@@ -92,10 +214,12 @@ final class ChatViewModel {
                 if provider.supportsStreaming && settings.useStreaming {
                     // Streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
+                    let imagePayloads = attachmentsToSend.map { ImagePayload(data: $0.data, mimeType: $0.mimeType) }
                     let stream = try await diContainer.requestQueue.execute(providerID: provider.id) {
                         try await provider.streamMessage(
                             text,
                             conversation: history,
+                            images: imagePayloads,
                             settings: settings
                         )
                     }
@@ -113,10 +237,12 @@ final class ChatViewModel {
                 } else {
                     // Non-streaming mode
                     let history = conversation.sortedMessages.dropLast().map { $0.toDTO }
+                    let imagePayloads = attachmentsToSend.map { ImagePayload(data: $0.data, mimeType: $0.mimeType) }
                     let response = try await diContainer.requestQueue.execute(providerID: provider.id) {
                         try await provider.sendMessage(
                             text,
                             conversation: history,
+                            images: imagePayloads,
                             settings: settings
                         )
                     }
@@ -159,6 +285,7 @@ final class ChatViewModel {
                     role: "assistant",
                     content: streamingText,
                     conversation: conversation,
+                    parentMessageID: userMessage.id,
                     providerID: provider.id,
                     tokenCount: lastResponseTokens,
                     latencyMs: latency,
@@ -195,6 +322,7 @@ final class ChatViewModel {
                         role: "assistant",
                         content: streamingText + "\n\n⚠️ *Stream interrupted*",
                         conversation: conversation,
+                        parentMessageID: userMessage.id,
                         providerID: provider.id,
                         latencyMs: latency,
                         model: settings.modelName

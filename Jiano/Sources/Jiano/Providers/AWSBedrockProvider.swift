@@ -33,11 +33,12 @@ final class AWSBedrockProvider: AIProvider, @unchecked Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         let startTime = CFAbsoluteTimeGetCurrent()
 
-        let stream = try await streamMessage(message, conversation: conversation, settings: settings)
+        let stream = try await streamMessage(message, conversation: conversation, images: images, settings: settings)
 
         var fullContent = ""
         for try await chunk in stream {
@@ -68,6 +69,7 @@ final class AWSBedrockProvider: AIProvider, @unchecked Sendable {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         // Bedrock streaming implementation requires dealing with AWS event stream binary format
@@ -79,7 +81,7 @@ final class AWSBedrockProvider: AIProvider, @unchecked Sendable {
         // No, I must match protocol requirement. 
         // I'll use the default implementation logic manually here or just wrap sendMessage.
         
-        let response = try await sendMessage(message, conversation: conversation, settings: settings)
+        let response = try await sendMessage(message, conversation: conversation, images: images, settings: settings)
         
         return AsyncThrowingStream { continuation in
             continuation.yield(.content(response.content))

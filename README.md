@@ -12,20 +12,21 @@
   <img src="https://img.shields.io/badge/platform-macOS%2014%2B-blue?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/swift-5.9-orange?style=flat-square" alt="Swift" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
-  <img src="https://img.shields.io/badge/providers-8-purple?style=flat-square" alt="Providers" />
+  <img src="https://img.shields.io/badge/providers-11-purple?style=flat-square" alt="Providers" />
 </p>
 
 ---
 
-OpusNative is a **native macOS application** built with SwiftUI and SwiftData that connects you to multiple AI providers through a single, premium interface. Switch between Anthropic Claude, OpenAI GPT, Google Gemini, xAI Grok, HuggingFace, Ollama (local), Custom Generic APIs, and AWS Bedrock — or compare them side-by-side in real time.
+OpusNative is a **native macOS application** built with SwiftUI and SwiftData that connects you to multiple AI providers through a single, premium interface. Switch between Anthropic Claude, OpenAI GPT, Google Gemini, xAI Grok, HuggingFace, Ollama (local), OpenRouter, LiteLLM, LM Studio, Azure OpenAI, Custom Generic APIs, and AWS Bedrock — or compare them side-by-side in real time.
 
 ## ✨ Features
 
 ### 💬 Multi-Provider Chat
-- **8 AI providers** in one unified interface — switch with a single click
+- **11 AI providers** in one unified interface — switch with a single click
 - **Real-time streaming** via SSE and NDJSON
-- Support for **System Prompts / Personas** and **Custom API Endpoints**
-- Full conversation history persisted with SwiftData
+- Support for **System Prompts / Personas** and **Custom API Endpoints** with live sync
+- Full conversation history persisted with SwiftData (branch-aware message threading)
+- **Vision / Image Input**: attach up to 5 images per message via file picker or drag-and-drop; inline thumbnail strip, full-screen tap-to-expand, and automatic base64 encoding for Anthropic and OpenAI vision APIs
 - Premium glassmorphism dark mode UI with smooth micro-animations
 
 ### ⚖️ Provider Comparison
@@ -38,6 +39,22 @@ OpusNative is a **native macOS application** built with SwiftUI and SwiftData th
 - Split-pane editor with automatic language detection
 - **Plugin System** for custom tools and third-party integrations
 - **Prompt Library** & **Command Palette** for fast workflow access
+
+### 🔌 Provider Ecosystem
+| Provider | Type | Vision |
+|----------|------|--------|
+| Anthropic Claude | Cloud | ✅ |
+| OpenAI GPT | Cloud | ✅ |
+| Google Gemini | Cloud | ✅ |
+| xAI Grok | Cloud | — |
+| HuggingFace | Cloud | — |
+| AWS Bedrock | Cloud | — |
+| OpenRouter | Cloud | — |
+| LiteLLM | Self-hosted | — |
+| LM Studio | Local | — |
+| Azure OpenAI | Cloud | ✅ |
+| Ollama | Local | — |
+| Custom Generic API | Any | — |
 
 ### 🔧 System Tools
 | Tool | Description |

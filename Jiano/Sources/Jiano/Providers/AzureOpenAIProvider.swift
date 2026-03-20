@@ -65,6 +65,7 @@ final class AzureOpenAIProvider: AIProvider, @unchecked Sendable {
     func sendMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AIResponse {
         let apiKey = try getAPIKey()
@@ -121,6 +122,7 @@ final class AzureOpenAIProvider: AIProvider, @unchecked Sendable {
     func streamMessage(
         _ message: String,
         conversation: [MessageDTO],
+        images: [ImagePayload] = [],
         settings: ModelSettings
     ) async throws -> AsyncThrowingStream<AIStreamChunk, Error> {
         let apiKey = try getAPIKey()
