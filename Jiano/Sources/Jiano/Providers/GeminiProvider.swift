@@ -54,16 +54,31 @@ final class GeminiProvider: AIProvider, @unchecked Sendable {
 
         for msg in conversation {
             let role = msg.role == "assistant" ? "model" : "user"
-            contents.append([
-                "role": role,
-                "parts": [["text": msg.content]]
-            ])
+            var parts: [[String: Any]] = []
+            // Include any images stored on history messages
+            for img in msg.images {
+                parts.append([
+                    "inlineData": [
+                        "mimeType": img.mimeType,
+                        "data": img.data.base64EncodedString()
+                    ]
+                ])
+            }
+            parts.append(["text": msg.content])
+            contents.append(["role": role, "parts": parts])
         }
 
-        contents.append([
-            "role": "user",
-            "parts": [["text": message]]
-        ])
+        // Build current user message parts (images first, then text)
+        var userParts: [[String: Any]] = images.map { img in
+            [
+                "inlineData": [
+                    "mimeType": img.mimeType,
+                    "data": img.data.base64EncodedString()
+                ]
+            ]
+        }
+        userParts.append(["text": message])
+        contents.append(["role": "user", "parts": userParts])
 
         var body: [String: Any] = [
             "contents": contents,
@@ -102,13 +117,15 @@ final class GeminiProvider: AIProvider, @unchecked Sendable {
             throw AIProviderError.invalidResponse(provider: displayName, detail: "Could not parse response")
         }
 
-        // Gemini API might provide usage metadata, but for now we'll use placeholder
-        // TODO: Parse usageMetadata from Gemini response if available
-        
+        // Parse usage metadata
+        let usageMeta = json["usageMetadata"] as? [String: Any]
+        let inputTokens = usageMeta?["promptTokenCount"] as? Int
+        let outputTokens = usageMeta?["candidatesTokenCount"] as? Int
+
         return AIResponse(
             content: text,
-            inputTokenCount: nil,
-            outputTokenCount: nil,
+            inputTokenCount: inputTokens,
+            outputTokenCount: outputTokens,
             latencyMs: latency,
             model: settings.modelName,
             providerID: id,
