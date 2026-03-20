@@ -13,7 +13,7 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Update `ChatMessage.toDTO` extension to populate `images` from `imageData`/`imageMIMETypes`
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-  - [x]* 1.2 Write property test for `toDTO` image count invariant
+  - [x] 1.2 Write property test for `toDTO` image count invariant
     - **Property 8: toDTO image count invariant**
     - **Validates: Requirements 9.3, 9.5**
 
@@ -25,7 +25,7 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Extend `CodingKeys`, `init(from:)`, and `encode(to:)` for both new fields
     - _Requirements: 5.1, 5.2, 5.5_
 
-  - [x]* 2.2 Write property test for image persistence round-trip
+  - [x] 2.2 Write property test for image persistence round-trip
     - **Property 7: Image persistence round-trip**
     - **Validates: Requirements 5.2, 5.3, 5.5**
 
@@ -43,19 +43,19 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Enforce 5-image cap: add up to remaining slots, set `attachmentError` if limit hit
     - _Requirements: 1.3, 1.5, 1.6, 2.3, 2.4, 2.5, 10.1, 10.2, 10.3, 10.4_
 
-  - [x]* 4.3 Write property test for attachment count cap
+  - [x] 4.3 Write property test for attachment count cap
     - **Property 2: Attachment count never exceeds 5**
     - **Validates: Requirements 1.5, 2.5**
 
-  - [x]* 4.4 Write property test for valid file attachment adds to list
+  - [x] 4.4 Write property test for valid file attachment adds to list
     - **Property 1: Valid file attachment adds to list**
     - **Validates: Requirements 1.3, 2.3**
 
-  - [x]* 4.5 Write property test for invalid UTType rejection
+  - [x] 4.5 Write property test for invalid UTType rejection
     - **Property 3: Invalid UTType files are rejected**
     - **Validates: Requirements 2.4, 10.1, 10.2**
 
-  - [x]* 4.6 Write property test for oversized file rejection
+  - [x] 4.6 Write property test for oversized file rejection
     - **Property 4: Oversized files are rejected**
     - **Validates: Requirements 10.4**
 
@@ -63,7 +63,7 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Remove the attachment matching `id` from `pendingAttachments`
     - _Requirements: 3.4_
 
-  - [x]* 4.8 Write property test for clean deletion
+  - [x] 4.8 Write property test for clean deletion
     - **Property 5: Remove attachment is a clean deletion**
     - **Validates: Requirements 3.4**
 
@@ -83,7 +83,7 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Before sending, check each attachment's base64 size: > 5 MB for Anthropic → set `errorMessage`, abort; > 20 MB for OpenAI → set `errorMessage`, abort
     - _Requirements: 4.4, 7.5, 8.5_
 
-  - [x]* 5.3 Write property test for non-vision provider strips images
+  - [x] 5.3 Write property test for non-vision provider strips images
     - **Property 6: Non-vision provider strips images from request**
     - **Validates: Requirements 4.4**
 
@@ -97,11 +97,11 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Update `buildRequest` signature to accept `MessageDTO` (or pass images alongside the message text)
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-  - [x]* 7.2 Write property test for Anthropic content block structure
+  - [x] 7.2 Write property test for Anthropic content block structure
     - **Property 9: Anthropic content block structure**
     - **Validates: Requirements 7.1, 7.2**
 
-  - [x]* 7.3 Write property test for text-only backward compatibility (Anthropic)
+  - [x] 7.3 Write property test for text-only backward compatibility (Anthropic)
     - **Property 11: Text-only backward compatibility**
     - **Validates: Requirements 7.4**
 
@@ -111,11 +111,11 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - When `dto.images` is empty, keep `content` as a plain string (existing behavior)
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-  - [x]* 8.2 Write property test for OpenAI content block structure
+  - [x] 8.2 Write property test for OpenAI content block structure
     - **Property 10: OpenAI content block structure**
     - **Validates: Requirements 8.1, 8.2**
 
-  - [x]* 8.3 Write property test for base64 encoding round-trip
+  - [x] 8.3 Write property test for base64 encoding round-trip
     - **Property 12: Base64 encoding round-trip**
     - **Validates: Requirements 7.3, 8.3**
 
@@ -147,11 +147,11 @@ Extend Jiano's chat interface with image attachment support. Work proceeds botto
     - Show placeholder (`Image(systemName: "photo")` + "Image unavailable") for any `Data` that fails `NSImage(data:)` init
     - _Requirements: 6.1, 6.2, 6.3, 6.5_
 
-  - [x]* 11.2 Write property test for image rendering order
+  - [x] 11.2 Write property test for image rendering order
     - **Property 13: Image rendering order matches attachment order**
     - **Validates: Requirements 6.3**
 
-  - [x]* 11.3 Write property test for invalid image data placeholder
+  - [x] 11.3 Write property test for invalid image data placeholder
     - **Property 14: Invalid image data shows placeholder**
     - **Validates: Requirements 6.5**
 

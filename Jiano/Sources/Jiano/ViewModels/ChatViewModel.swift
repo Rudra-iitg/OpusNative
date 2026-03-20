@@ -20,6 +20,7 @@ final class ChatViewModel {
     var errorMessage: String?
     var selectedConversation: Conversation? {
         didSet {
+            diContainer.contextManager.clearOverride()
             if let conversation = selectedConversation {
                 diContainer.contextManager.updateUsage(messages: conversation.sortedMessages, model: diContainer.aiManager.settings.modelName)
             }
